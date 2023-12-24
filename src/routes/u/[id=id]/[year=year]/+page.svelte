@@ -11,8 +11,10 @@
 	import Button from '$lib/components/Button.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Header from '$lib/components/Header.svelte';
+	import prettyMilliseconds from 'pretty-ms';
 
   export let data: PageData;
+  const available = Object.keys(data.yearInReview).length !== 0;
 
   let tabs = [
     'Overview',
@@ -20,8 +22,25 @@
   ];
   let activeTab = 0;
 
-  // TODO embed
+  let playtimeStats = !available ? null : data.yearInReview.stats.playtime_stats;
 </script>
+
+<svelte:head>
+  <meta content={`${data.profile.personaname}'s ${data.year} Year in Review`} property="og:title" />
+  <meta content={data.profile.avatarfull} property="og:image" />
+  <meta content="image/png" property="og:image:type" />
+  <meta
+    content={!playtimeStats
+    ? 'Failed to get information...'
+    : [
+      `${playtimeStats.game_summary.length.toLocaleString()} games`,
+      `${playtimeStats.total_stats.total_sessions.toLocaleString()} sessions`,
+      `${prettyMilliseconds(playtimeStats.total_stats.total_playtime_seconds * 1000, { compact: true, verbose: true })} of total playtime`
+    ].join(', ')} property="og:description" />
+  <meta content={`https://steam.exposed/u/${data.profile.steamid}/${data.year}`} property="og:url" />
+  <meta property="twitter:card" content="summary">
+  <title>{data.profile.personaname}'s {data.year} Year in Review - steam.exposed</title>
+</svelte:head>
 
 <Header />
 
@@ -44,11 +63,11 @@
 
   {#await data.data}
     <div class="flex flex-col gap-2 justify-center items-center select-none mt-20">
-      <img src="/spinner.png" alt="Loading" class="w-32 h-32" />
+      <img src="/images/spinner.png" alt="Loading" class="w-32 h-32" />
       <span class="text-sm">Loading...</span>
     </div>
   {:then result}
-    {@const unavailable = Object.keys(result.yearInReview).length === 0}
+    {@const unavailable = Object.keys(data.yearInReview).length === 0}
     {#if unavailable}
       <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
         <Icon icon={cancelIcon} class="w-16 h-16" />
@@ -68,12 +87,12 @@
         {/each}
       </div>
       {#if activeTab === 0}
-        <OverallStatistics yearInReview={result.yearInReview} />
-        <GamesSection yearInReview={result.yearInReview} />
-        <PlatformSection yearInReview={result.yearInReview} />
-        <TagStatistics tags={result.tags} yearInReview={result.yearInReview} />
+        <OverallStatistics yearInReview={data.yearInReview} />
+        <GamesSection yearInReview={data.yearInReview} />
+        <PlatformSection yearInReview={data.yearInReview} />
+        <TagStatistics tags={result.tags} yearInReview={data.yearInReview} />
       {:else if activeTab === 1}
-        <GameGrid apps={result.apps} yearInReview={result.yearInReview} />
+        <GameGrid apps={result.apps} yearInReview={data.yearInReview} />
       {/if}
     {/if}
   {:catch error}

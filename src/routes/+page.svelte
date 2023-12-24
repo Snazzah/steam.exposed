@@ -71,15 +71,23 @@
     inputErrored = true;
   }
 
-  // TODO metadata, favicon
-
   let errorPrompt = '';
   onMount(() => {
     if (location.hash === '#user_not_found') errorPrompt = "Failed to go to that user's profile...";
   })
 </script>
+
+<svelte:head>
+  <meta content="steam.exposed" property="og:title" />
+  <meta content="https://steam.exposed/images/social.png" property="og:image" />
+  <meta content="image/png" property="og:image:type" />
+  <meta content="Breakdowns of Steam's Year in Reviews" property="og:description" />
+  <meta content="https://steam.exposed" property="og:url" />
+  <meta property="twitter:card" content="summary_large_image">
+</svelte:head>
+
 <main class="flex flex-col items-center justify-center min-h-screen gap-8 px-6">
-  <div class="bg-[url('/steam_fade.svg')] bg-contain bg-no-repeat bg-center flex flex-col justify-end text-center pt-60">
+  <div class="bg-[url('/images/steam_fade.svg')] bg-contain bg-no-repeat bg-center flex flex-col justify-end text-center pt-60">
     <h1 class="_shadow text-white font-bold text-4xl">steam.exposed</h1>
     <span  class="_shadow">Breakdowns of Steam's Year in Reviews</span>
   </div>

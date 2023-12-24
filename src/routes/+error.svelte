@@ -4,6 +4,15 @@
   import cancelIcon from '@iconify-icons/mdi/cancel';
 </script>
 
+<svelte:head>
+  <meta content="steam.exposed" property="og:title" />
+  <meta content="https://steam.exposed/images/icon.png" property="og:image" />
+  <meta content="image/png" property="og:image:type" />
+  <meta content="Breakdowns of Steam's Year in Reviews" property="og:description" />
+  <meta content="https://steam.exposed" property="og:url" />
+  <meta property="twitter:card" content="summary">
+</svelte:head>
+
 <main class="flex flex-col items-center justify-center min-h-screen">
   <Icon icon={cancelIcon} class="w-16 h-16 text-red-500" />
   <br />

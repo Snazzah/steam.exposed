@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-  <title>yir-revealed</title>
+  <title>steam.exposed</title>
 </svelte:head>
 
 <slot />

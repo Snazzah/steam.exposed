@@ -1,11 +1,9 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getAppInfo, getAppNames, getTags, getUser, getYearInReview } from '$lib/server/data';
+import type { SteamYearInReview } from '$lib/types';
 
-async function getData(id: string, year: number) {
-  const yearInReview = await getYearInReview(id, year);
-  if (yearInReview === null) throw new Error('Failed to load year in review');
-
+async function getData(yearInReview: SteamYearInReview) {
   const available = Object.keys(yearInReview).length !== 0;
 
   let tags: { tagid: number; name: string; }[] = [];
@@ -34,5 +32,8 @@ export const load: PageServerLoad = async ({ params }) => {
   if (profile === 0) throw error(404, 'User not found');
   else if (profile === null) throw error(500, 'Failed to load profile');
 
-  return { profile, year: params.year, data: getData(params.id, parseInt(params.year)) };
+  const yearInReview = await getYearInReview(params.id, parseInt(params.year));
+  if (yearInReview === null) throw new Error('Failed to load year in review');
+
+  return { profile, year: params.year, yearInReview, data: getData(yearInReview) };
 };
