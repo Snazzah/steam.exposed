@@ -1,0 +1,38 @@
+import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+import { getAppInfo, getAppNames, getTags, getUser, getYearInReview } from '$lib/server/data';
+
+async function getData(id: string, year: number) {
+  const yearInReview = await getYearInReview(id, year);
+  if (yearInReview === null) throw new Error('Failed to load year in review');
+
+  const available = Object.keys(yearInReview).length !== 0;
+
+  let tags: { tagid: number; name: string; }[] = [];
+  let apps: Record<number, string> = {};
+  if (available) {
+    const taglist = await getTags();
+    if (taglist) tags = taglist.filter(({ tagid }) => !!yearInReview.stats.playtime_stats.tag_stats.stats.find((t) => t.tag_id === tagid));
+
+    const appIds = yearInReview.stats.playtime_stats.game_summary.map((g) => g.appid);
+    apps = await getAppNames(appIds);
+    const appInfos = await getAppInfo(yearInReview.stats.playtime_stats.game_summary.filter((g) => apps[g.appid] === '' || !apps[g.appid]).map((g) => g.appid))
+    for (const appId in appInfos) {
+      const app = appInfos[appId];
+      if (!('miss' in app)) {
+        apps[Number(appId)] = app.name;
+        if (app.fullgame?.appid) apps[Number(app.fullgame.appid)] = app.fullgame.name;
+      }
+    }
+  }
+
+  return { yearInReview, tags, apps };
+}
+
+export const load: PageServerLoad = async ({ params }) => {
+  const profile = await getUser(params.id);
+  if (profile === 0) throw error(404, 'User not found');
+  else if (profile === null) throw error(500, 'Failed to load profile');
+
+  return { profile, year: params.year, data: getData(params.id, parseInt(params.year)) };
+};
