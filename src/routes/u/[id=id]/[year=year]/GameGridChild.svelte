@@ -129,6 +129,7 @@
   ._appname {
     filter: drop-shadow(0px 2px 2px black);
   }
+
   ._footer, ._demo {
     filter: drop-shadow(0px 0px 2px black);
   }

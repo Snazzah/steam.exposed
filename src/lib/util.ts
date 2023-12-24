@@ -34,9 +34,19 @@ export const inviteUrlDictionary: Record<string, string> = {
 
 export function inviteUrlToSteamID(inviteCode: string) {
   try {
-    const accountId = BigInt(parseInt(inviteCode.split('').map((c) => inviteUrlDictionary[c]).filter((c) => !!c).join(''), 16))
-    console.log(accountId)
+    const accountId = BigInt(parseInt(inviteCode.split('').map((c) => inviteUrlDictionary[c]).filter((c) => !!c).join(''), 16));
     return (1n << 56n) | (1n << 52n) | (1n << 32n) | accountId;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function steamIdToInviteUrl(steamid: string) {
+  try {
+    const accountId = BigInt(steamid) & 0xFFFFFFFFn;
+
+    // cursed.
+    return accountId.toString(16).split('').map((c) => Object.entries(inviteUrlDictionary).find(([, h]) => h === c)?.[0] || '').join('');
   } catch (e) {
     return null;
   }

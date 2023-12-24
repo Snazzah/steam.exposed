@@ -151,8 +151,6 @@
   function onModalClick (this: any, e: any) {
     if (e.target === this) selectedApp = null;
   }
-
-  // TODO working search
 </script>
 
 <div class="flex flex-col md:flex-row gap-2 md:gap-8 w-full justify-between">
