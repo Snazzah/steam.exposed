@@ -72,7 +72,7 @@
       <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
         <Icon icon={cancelIcon} class="w-16 h-16" />
         <h3 class="text-2xl font-bold">Data Unavailable</h3>
-        <span class="text-neutral-500 text-center">The data for {data.year}'s year in review wound up empty, has this user created their year in review?</span>
+        <span class="text-neutral-500 text-center">The data for {data.year}'s year in review wound up empty, is their page set to <b>public</b>?</span>
       </div>
     {:else}
       <div class="flex gap-2 whitespace-nowrap w-full">
