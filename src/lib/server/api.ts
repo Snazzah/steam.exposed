@@ -88,3 +88,11 @@ export async function fetchAppInfo(appid: number) {
   const data: any = await response.json();
   return data[String(appid)] as { success: false } | { success: true; data: SteamAppInfo };
 }
+
+export async function fetchVanity(vanityUrl: string) {
+  console.info(`Fetching vanity url resolution to ${vanityUrl}`);
+  const response = await fetch(`https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/?key=${STEAM_WEBKEY}&vanityurl=${vanityUrl}`);
+  if (response.status !== 200) return null;
+  const data: any = await response.json();
+  return data.response as { success: 42, message: "No match" } | { steamid: "76561198063017988", success: 1 };
+}

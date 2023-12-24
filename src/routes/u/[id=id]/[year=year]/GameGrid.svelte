@@ -170,7 +170,7 @@
         <Icon icon={menuIcon} class="w-6 h-6" />
       </button>
       {#if showSortDropdown}
-        <div class="absolute top-full w-full bg-neutral-800 rounded mt-2 z-20 flex flex-col overflow-hidden">
+        <div class="absolute top-full w-full bg-neutral-800 rounded mt-2 z-20 flex flex-col overflow-hidden drop-shadow-md">
           {#each sortNames as sortName, i}
             <button
               class="w-full px-4 py-2 transition-all hover:bg-neutral-700 flex items-center justify-between"

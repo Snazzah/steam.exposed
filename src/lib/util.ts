@@ -1,3 +1,18 @@
+export function getLatestYear() {
+  const currentYear = new Date().getFullYear();
+  const nextDate = new Date(`December 15 ${currentYear}`);
+  if (nextDate.valueOf() < Date.now()) return currentYear;
+  return currentYear - 1;
+}
+export const MIN_YEAR = 2022;
+
+export function clampYear(unparsedYear: string | number) {
+  const year = typeof unparsedYear === 'string' ? parseInt(unparsedYear) : Math.round(unparsedYear);
+  const LATEST_YEAR = getLatestYear();
+  if (!year || isNaN(year) || !isFinite(year)) return LATEST_YEAR;
+  return Math.max(MIN_YEAR, Math.min(year, LATEST_YEAR))
+}
+
 export const inviteUrlDictionary: Record<string, string> = {
   'b': '0',
   'c': '1',
@@ -20,6 +35,7 @@ export const inviteUrlDictionary: Record<string, string> = {
 export function inviteUrlToSteamID(inviteCode: string) {
   try {
     const accountId = BigInt(parseInt(inviteCode.split('').map((c) => inviteUrlDictionary[c]).filter((c) => !!c).join(''), 16))
+    console.log(accountId)
     return (1n << 56n) | (1n << 52n) | (1n << 32n) | accountId;
   } catch (e) {
     return null;

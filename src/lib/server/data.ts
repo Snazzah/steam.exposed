@@ -1,5 +1,5 @@
 import type { SteamTag, SteamYearInReview } from "$lib/types";
-import { fetchAppInfo, fetchSteamSummary, fetchYearInReview, getAppList, getTagList, type SteamAppInfo, type SteamSummary } from "./api";
+import { fetchAppInfo, fetchSteamSummary, fetchVanity, fetchYearInReview, getAppList, getTagList, type SteamAppInfo, type SteamSummary } from "./api";
 import { redis } from "./redis";
 
 export async function getAppNames(appids: number[]) {
@@ -42,7 +42,7 @@ export async function getAppNames(appids: number[]) {
 
     for (let i = 0; i < missedIds.length; i++) {
       const id = missedIds[i];
-      await redis.set(`appname:${id}`, '', 'EX', 3600);
+      await redis.set(`appname:${id}`, '', 'EX', 86400);
     }
 
     if (idsLeft.size === 0) break;
@@ -124,8 +124,17 @@ export async function getYearInReview(steamid: string, year: number): Promise<St
     return data;
   }
 
-  await redis.set(`yearinreview:${steamid}:${year}`, JSON.stringify(data), 'EX', 86400);
+  await redis.set(`yearinreview:${steamid}:${year}`, JSON.stringify(data));
   return data;
 }
 
-// TODO vanity url redirect
+export async function getVanityResolution(vanity: string): Promise<string | null> {
+  const cached = await redis.get(`vanity:${vanity}`);
+  if (cached) return cached;
+
+  const data = await fetchVanity(vanity);
+  if (!data || data.success !== 1) return null;
+
+  await redis.set(`vanity:${vanity}`, data.steamid, 'EX', 86400);
+  return data.steamid;
+}
