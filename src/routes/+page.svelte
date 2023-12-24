@@ -34,7 +34,7 @@
     }
 
     if (input.includes('://steamcommunity.com/')) {
-      const vanityUrl = input.match(/^\s*https?:\/\/steamcommunity\.com\/id\/([A-Za-z0-9]{2,32})/);
+      const vanityUrl = input.match(/^\s*https?:\/\/steamcommunity\.com\/id\/([A-Za-z0-9_-]{2,32})/);
       if (vanityUrl) return location.href = `/id/${vanityUrl[1]}?year=${selectedYear}`;
 
       const profileUrl = input.match(/^\s*https?:\/\/steamcommunity\.com\/profiles\/([0-9]+)/);
