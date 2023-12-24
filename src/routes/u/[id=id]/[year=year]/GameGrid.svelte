@@ -2,6 +2,7 @@
 	import type { PlaytimeStatsGameSummary, SteamYearInReview } from "$lib/types";
 	import { clickOutside } from "$lib/actions";
 	import Portal from "svelte-portal";
+  import fuzzy from 'fuzzy';
 	import GameGridChild from "./GameGridChild.svelte";
 	import { fade, fly } from "svelte/transition";
 	import GameModal from "./GameModal.svelte";
@@ -9,6 +10,7 @@
 	import Icon from "@iconify/svelte";
   import menuIcon from '@iconify-icons/mdi/menu-down';
   import checkIcon from '@iconify-icons/mdi/check';
+  import clearIcon from '@iconify-icons/mdi/close';
   import filterIcon from '@iconify-icons/mdi/filter-outline';
   import filterUsedIcon from '@iconify-icons/mdi/filter';
   import windowsIcon from '@iconify-icons/mdi/windows';
@@ -90,8 +92,9 @@
   }
 
 
-  $: games = sortGames(sortType, $filters);
-  function sortGames(sortType: number, filters: typeof defaultFilters) {
+  let searchQuery = '';
+  $: games = sortGames(sortType, $filters, searchQuery);
+  function sortGames(sortType: number, filters: typeof defaultFilters, query: string) {
     let sortFn: ((a: PlaytimeStatsGameSummary, b: PlaytimeStatsGameSummary) => number) | null = null;
 
     switch (sortType) {
@@ -113,10 +116,10 @@
       }
     }
 
-    const games = [...yearInReview.stats.playtime_stats.game_summary];
+    let games = [...yearInReview.stats.playtime_stats.game_summary];
     if (sortFn) games.sort(sortFn);
 
-    return games.filter((game) => {
+    games = games.filter((game) => {
       const platformFilter = (filters.platforms.windows && game.played_windows)
         || (filters.platforms.mac && game.played_mac)
         || (filters.platforms.linux && game.played_linux)
@@ -138,6 +141,10 @@
 
       return true;
     });
+    if (!query) return games;
+
+    const results = fuzzy.filter(query, games, { extract(g) { return `${apps[g.appid]} (${g.appid})`; }});
+    return results.map((r) => r.original);
   }
 
   let selectedApp: number | null = null;
@@ -156,7 +163,19 @@
         <span class="text-neutral-500">(out of {yearInReview.stats.playtime_stats.game_summary.length.toLocaleString()})</span>
       {/if}
     </span>
-    <input class="w-full px-4 py-2 transition-all border border-neutral-600 hover:border-neutral-400 rounded bg-neutral-900 placeholder:text-neutral-600" placeholder="Search..." />
+    <input
+      bind:value={searchQuery}
+      class="w-full px-4 py-2 transition-all pr-12 border border-neutral-600 hover:border-neutral-400 rounded bg-neutral-900 placeholder:text-neutral-600"
+      placeholder="Search..."
+    />
+    {#if searchQuery !== ''}
+      <button
+        on:click={() => searchQuery = ''}
+        class="absolute right-0 top-0 bottom-0 h-full px-4 hover:text-red-500 transition-colors"
+      >
+        <Icon icon={clearIcon} class="w-6 h-6" />
+      </button>
+    {/if}
   </div>
   <div class="flex items-center justify-center gap-2 relative">
     <span class="flex-none">Sort by</span>
