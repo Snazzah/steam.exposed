@@ -9,7 +9,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"start": "node -r dotenv/config build"
 	},
 	"devDependencies": {
 		"@floating-ui/core": "^1.5.2",
@@ -26,6 +27,7 @@
 		"@typescript-eslint/parser": "^6.0.0",
 		"autoprefixer": "^10.4.16",
 		"chart.js": "^4.4.1",
+		"dotenv": "^16.3.1",
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.30.0",
