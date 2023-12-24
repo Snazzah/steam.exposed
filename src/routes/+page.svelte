@@ -6,6 +6,7 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import { MIN_YEAR, getLatestYear, inviteUrlToSteamID } from "$lib/util";
 	import { clickOutside } from "$lib/actions";
+	import { onMount } from "svelte";
 
   const LATEST_YEAR = getLatestYear();
   let selectedYear = LATEST_YEAR;
@@ -71,13 +72,22 @@
   }
 
   // TODO metadata, favicon
-  // TODO make new icon?
+
+  let errorPrompt = '';
+  onMount(() => {
+    if (location.hash === '#user_not_found') errorPrompt = "Failed to go to that user's profile...";
+  })
 </script>
 <main class="flex flex-col items-center justify-center min-h-screen gap-8 px-6">
   <div class="bg-[url('/steam_fade.svg')] bg-contain bg-no-repeat bg-center flex flex-col justify-end text-center pt-60">
     <h1 class="_shadow text-white font-bold text-4xl">steam.exposed</h1>
     <span  class="_shadow">Breakdowns of Steam's Year in Reviews</span>
   </div>
+  {#if errorPrompt}
+    <div class="px-4 py-2 rounded bg-red-500 text-white font-bold">
+      {errorPrompt}
+    </div>
+  {/if}
   <div class="flex md:block flex-col gap-4 md:relative w-full max-w-lg">
     <input
       on:keypress={(e) => {
