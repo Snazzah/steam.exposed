@@ -6,10 +6,8 @@ export async function getAppNames(appids: number[]) {
   const idsLeft = new Set(appids);
   const results: Record<number, string> = {};
 
-  const firstFetchedKeys = await redis.mget(appids.map((id) => `appname:${id}`));
-  for (let i = 0; i < appids.length; i++) {
-    const appid = appids[i];
-    const name = firstFetchedKeys[i];
+  for (const appid of appids) {
+    const name = await redis.get(`appname:${appid}`);
     if (name !== null) {
       idsLeft.delete(appid);
       results[appid] = name;
@@ -56,10 +54,8 @@ export async function getAppInfo(appids: number[]) {
   const idsLeft = new Set(appids);
   const results: Record<number, SteamAppInfo | { miss: true }> = {};
 
-  const firstFetchedKeys = await redis.mget(appids.map((id) => `appinfo:${id}`));
-  for (let i = 0; i < appids.length; i++) {
-    const appid = appids[i];
-    const data = firstFetchedKeys[i];
+  for (const appid of appids) {
+    const data = await redis.get(`appinfo:${appid}`);
     if (data !== null) {
       idsLeft.delete(appid);
       results[appid] = JSON.parse(data);
