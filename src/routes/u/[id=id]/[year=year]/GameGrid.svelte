@@ -85,7 +85,6 @@
     playtest: 0
   }
   let filters = writable(defaultFilters);
-  // TODO bruh
   $: filtersApplied = JSON.stringify(defaultFilters) !== JSON.stringify($filters);
   function clearFilters() {
     filters.set(defaultFilters);
