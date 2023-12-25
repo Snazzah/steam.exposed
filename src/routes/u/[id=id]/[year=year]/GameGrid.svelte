@@ -306,7 +306,7 @@
     >
       <div
         transition:fly={{ duration: 250 , y: 32 }}
-        class="w-[1024px] max-h-[calc(100vh-6rem)] relative text-neutral-200 bg-neutral-900 rounded-t md:rounded-b shadow-lg flex-col justify-start items-start inline-flex overflow-hidden"
+        class="w-[1024px] max-h-[calc(100svh-6rem)] relative text-neutral-200 bg-neutral-900 rounded-t md:rounded-b shadow-lg flex-col justify-start items-start inline-flex overflow-hidden"
       >
         <GameModal appId={selectedApp} {apps} {yearInReview} />
       </div>
