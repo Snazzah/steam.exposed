@@ -1,6 +1,7 @@
 import { STEAM_WEBKEY } from '$env/static/private';
 import type { SteamTag, SteamYearInReview } from '$lib/types';
 import { fetch } from 'undici';
+import { logInfo } from './logger';
 
 export enum SteamPersonaState {
   OFFLINE = 0,
@@ -50,7 +51,7 @@ export interface SteamAppInfo {
 }
 
 export async function fetchSteamSummary(steamid: string) {
-  console.info(`Fetching summary for for steamid ${steamid}`);
+  logInfo(`Fetching summary for for steamid ${steamid}`);
   const response = await fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${STEAM_WEBKEY}&steamids=${steamid}`);
   if (response.status !== 200) return null;
   const text = await response.text();
@@ -58,7 +59,7 @@ export async function fetchSteamSummary(steamid: string) {
 }
 
 export async function getAppList(lastAppId?: number) {
-  console.info(`Fetching app list${lastAppId ? ` (lastAppId=${lastAppId})` : ''}`);
+  logInfo(`Fetching app list${lastAppId ? ` (lastAppId=${lastAppId})` : ''}`);
   const response = await fetch(`https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${STEAM_WEBKEY}&max_results=50000${lastAppId ? `&last_appid=${lastAppId}` : ''}`);
   if (response.status !== 200) return null;
   const text = await response.text();
@@ -66,7 +67,7 @@ export async function getAppList(lastAppId?: number) {
 }
 
 export async function getTagList(lang = 'english') {
-  console.info(`Fetching tag list for lang ${lang}`);
+  logInfo(`Fetching tag list for lang ${lang}`);
   const response = await fetch(`https://api.steampowered.com/IStoreService/GetTagList/v1/?key=${STEAM_WEBKEY}&language=${lang}`);
   if (response.status !== 200) return null;
   const text = await response.text();
@@ -74,7 +75,7 @@ export async function getTagList(lang = 'english') {
 }
 
 export async function fetchYearInReview(steamid: string, year: number) {
-  console.info(`Fetching year in review for for steamid ${steamid} at year ${year}`);
+  logInfo(`Fetching year in review for for steamid ${steamid} at year ${year}`);
   const response = await fetch(`https://api.steampowered.com/ISaleFeatureService/GetUserYearInReview/v1/?key=${STEAM_WEBKEY}&steamid=${steamid}&year=${year}`);
   if (response.status !== 200) return null;
   const text = await response.text();
@@ -82,7 +83,7 @@ export async function fetchYearInReview(steamid: string, year: number) {
 }
 
 export async function fetchAppInfo(appid: number) {
-  console.info(`Fetching app information for app ${appid}`);
+  logInfo(`Fetching app information for app ${appid}`);
   const response = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appid}&cc=US`);
   if (response.status !== 200) return null;
   const data: any = await response.json();
@@ -90,7 +91,7 @@ export async function fetchAppInfo(appid: number) {
 }
 
 export async function fetchVanity(vanityUrl: string) {
-  console.info(`Fetching vanity url resolution to ${vanityUrl}`);
+  logInfo(`Fetching vanity url resolution to ${vanityUrl}`);
   const response = await fetch(`https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/?key=${STEAM_WEBKEY}&vanityurl=${vanityUrl}`);
   if (response.status !== 200) return null;
   const data: any = await response.json();
