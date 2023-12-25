@@ -7,6 +7,7 @@
 	import { MIN_YEAR, getLatestYear, inviteUrlToSteamID } from "$lib/util";
 	import { clickOutside } from "$lib/actions";
 	import { onMount } from "svelte";
+	import { updated } from "$app/stores";
 
   const LATEST_YEAR = getLatestYear();
   let selectedYear = LATEST_YEAR;
@@ -95,6 +96,11 @@
     <div class="px-4 py-2 rounded bg-red-500 text-white font-bold">
       {errorPrompt}
     </div>
+  {/if}
+  {#if $updated}
+    <button class="px-4 py-1 rounded text-black font-bold text-sm transition-colors bg-blue-500 hover:bg-blue-400 shadow shadow-blue-500" on:click={() => location.reload()}>
+      Site Updated, Refresh!
+    </button>
   {/if}
   <div class="flex md:block flex-col gap-4 md:relative w-full max-w-lg">
     <input
