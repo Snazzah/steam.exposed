@@ -67,7 +67,7 @@
     }
 
     if (/^[0-9]+$/.test(input) && BigInt(input) >= 76561197962146232n) return location.href = `/u/${input}/${selectedYear}`;
-    if (/^[A-Za-z0-9]{2,32}$/.test(input)) return location.href = `/id/${input}?year=${selectedYear}`;
+    if (/^[A-Za-z0-9_-]{2,32}$/.test(input)) return location.href = `/id/${input}?year=${selectedYear}`;
 
     inputErrored = true;
   }
