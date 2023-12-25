@@ -61,7 +61,7 @@
 
 <Header />
 
-<main class="flex flex-col max-w-6xl mx-auto py-10 px-4 md:px-10 gap-10 mt-16">
+<main class="flex flex-col max-w-6xl mx-auto py-10 px-4 md:px-10 gap-10 pt-[6.5rem]">
   <div class="flex flex-col items-center gap-10 md:flex-row">
     <img src={data.profile.avatarfull} class="w-44 h-44 rounded" alt={data.profile.personaname} />
     <div class="flex flex-col items-center md:items-start">
@@ -110,7 +110,10 @@
         </div>
       </div>
       <div class="flex flex-col gap-4 mt-6 md:flex-row">
-        <Button href={`https://store.steampowered.com/yearinreview/${data.profile.steamid}/${data.year}`}>
+        <Button
+          href={`https://store.steampowered.com/yearinreview/${data.profile.steamid}/${data.year}`}
+          highlight={!available}
+        >
           View on Steam
         </Button>
         <Button href={data.profile.profileurl} icon={steamIcon}>
