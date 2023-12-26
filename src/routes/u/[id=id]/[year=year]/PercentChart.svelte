@@ -15,12 +15,14 @@
 <div class="flex flex-col gap-4">
   <div class="flex relative h-4">
     {#each data as part}
-      <span
-        class="h-full"
-        style:width={`${(part.value / completeValue) * 100}%`}
-        style:background-color={part.color}
-        title={`${part.name}: ${formatMs ? prettyMilliseconds(part.value * 1000) : part.value.toLocaleString()}`}
-      />
+      {#if part.value !== 0}
+        <span
+          class="h-full"
+          style:width={`${(part.value / completeValue) * 100}%`}
+          style:background-color={part.color}
+          title={`${part.name}: ${formatMs ? prettyMilliseconds(part.value * 1000) : part.value.toLocaleString()}`}
+        />
+      {/if}
     {/each}
   </div>
   <div class="flex gap-4 justify-around flex-col items-start md:flex-row md:items-center flex-wrap">

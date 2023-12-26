@@ -7,7 +7,7 @@
 
 
 <div>
-  <h3 class="text-3xl font-extrabold text-white mb-2">Tag Statistics</h3>
+  <h3 class="text-3xl font-extrabold text-white mb-6">Games by Tag</h3>
   <dl class="flex flex-col gap-1">
     {#each yearInReview.stats.playtime_stats.tag_stats.stats as tag (tag.tag_id)}
       {@const taginfo = tags.find((t) => tag.tag_id === t.tagid)}
