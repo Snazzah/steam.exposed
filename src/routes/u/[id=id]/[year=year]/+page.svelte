@@ -123,47 +123,53 @@
     </div>
   </div>
 
-  {#await data.data}
+  {#if !data.data}
     <div class="flex flex-col gap-2 justify-center items-center select-none mt-20">
-      <img src="/images/spinner.png" alt="Loading" class="w-32 h-32" />
-      <span class="text-sm">Loading...</span>
+      <span class="text-sm">Data loading was skipped, you should fix your User Agent header.</span>
     </div>
-  {:then result}
-    {@const unavailable = Object.keys(data.yearInReview).length === 0}
-    {#if unavailable}
+  {:else}
+    {#await data.data}
+      <div class="flex flex-col gap-2 justify-center items-center select-none mt-20">
+        <img src="/images/spinner.png" alt="Loading" class="w-32 h-32" />
+        <span class="text-sm">Loading...</span>
+      </div>
+    {:then result}
+      {@const unavailable = Object.keys(data.yearInReview).length === 0}
+      {#if unavailable}
+        <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
+          <Icon icon={cancelIcon} class="w-16 h-16" />
+          <h3 class="text-2xl font-bold">Data Unavailable</h3>
+          <span class="text-neutral-400 text-center">The data for {data.year}'s year in review wound up empty. The account must set their Year in Review's <b>Page Visibility</b> to <b>Public</b>.</span>
+        </div>
+      {:else}
+        <div class="flex gap-2 whitespace-nowrap w-full">
+          {#each tabs as tab, i}
+            <button
+              class="_tab"
+              class:--active={activeTab === i}
+              on:click={() => activeTab = i}
+            >
+              {tab}
+            </button>
+          {/each}
+        </div>
+        {#if activeTab === 0}
+          <OverallStatistics yearInReview={data.yearInReview} />
+          <GamesSection yearInReview={data.yearInReview} />
+          <PlatformSection yearInReview={data.yearInReview} />
+          <TagStatistics tags={result.tags} yearInReview={data.yearInReview} />
+        {:else if activeTab === 1}
+          <GameGrid apps={result.apps} yearInReview={data.yearInReview} />
+        {/if}
+      {/if}
+    {:catch error}
       <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
         <Icon icon={cancelIcon} class="w-16 h-16" />
-        <h3 class="text-2xl font-bold">Data Unavailable</h3>
-        <span class="text-neutral-400 text-center">The data for {data.year}'s year in review wound up empty. The account must set their Year in Review's <b>Page Visibility</b> to <b>Public</b>.</span>
+        <h3 class="text-2xl font-bold">Error</h3>
+        <span class="text-neutral-500 text-center">{error.message}</span>
       </div>
-    {:else}
-      <div class="flex gap-2 whitespace-nowrap w-full">
-        {#each tabs as tab, i}
-          <button
-            class="_tab"
-            class:--active={activeTab === i}
-            on:click={() => activeTab = i}
-          >
-            {tab}
-          </button>
-        {/each}
-      </div>
-      {#if activeTab === 0}
-        <OverallStatistics yearInReview={data.yearInReview} />
-        <GamesSection yearInReview={data.yearInReview} />
-        <PlatformSection yearInReview={data.yearInReview} />
-        <TagStatistics tags={result.tags} yearInReview={data.yearInReview} />
-      {:else if activeTab === 1}
-        <GameGrid apps={result.apps} yearInReview={data.yearInReview} />
-      {/if}
-    {/if}
-  {:catch error}
-    <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
-      <Icon icon={cancelIcon} class="w-16 h-16" />
-      <h3 class="text-2xl font-bold">Error</h3>
-      <span class="text-neutral-500 text-center">{error.message}</span>
-    </div>
-  {/await}
+    {/await}
+  {/if}
 </main>
 
 <Footer />

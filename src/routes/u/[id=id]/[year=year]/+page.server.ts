@@ -27,7 +27,7 @@ async function getData(yearInReview: SteamYearInReview) {
   return { yearInReview, tags, apps };
 }
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, request}) => {
   const profile = await getUser(params.id);
   if (profile === 0) throw error(404, 'User not found');
   else if (profile === null) throw error(500, 'Failed to load profile');
@@ -35,5 +35,8 @@ export const load: PageServerLoad = async ({ params }) => {
   const yearInReview = await getYearInReview(params.id, parseInt(params.year));
   if (yearInReview === null) throw new Error('Failed to load year in review');
 
-  return { profile, year: params.year, yearInReview, data: getData(yearInReview) };
+  const userAgent = request.headers.get('User-Agent');
+  const isBot = !userAgent || /bot|chatgpt|facebookexternalhit|WhatsApp|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|MetaInspector/i.test(userAgent)
+
+  return { profile, year: params.year, yearInReview, data: isBot ? null : getData(yearInReview) };
 };
