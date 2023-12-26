@@ -1,5 +1,5 @@
 import type { SteamTag, SteamYearInReview } from "$lib/types";
-import { fetchAppInfo, fetchSteamSummary, fetchVanity, fetchYearInReview, getAppList, getTagList, type SteamAppInfo, type SteamSummary } from "./api";
+import { fetchAppInfo, fetchProfileItems, fetchSteamSummary, fetchVanity, fetchYearInReview, getAppList, getTagList, type SteamAppInfo, type SteamProfileItems, type SteamSummary } from "./api";
 import { redis } from "./redis";
 
 export async function getAppNames(appids: number[]) {
@@ -133,4 +133,18 @@ export async function getVanityResolution(vanity: string): Promise<string | null
 
   await redis.set(`vanity:${vanity}`, data.steamid, 'EX', 86400);
   return data.steamid;
+}
+
+export async function getProfileItems(steamid: string): Promise<SteamProfileItems | null> {
+  const cached = await redis.get(`profileitems:${steamid}`);
+  if (cached) return JSON.parse(cached);
+
+  const items = await fetchProfileItems(steamid);
+  if (!items) {
+    await redis.set(`profileitems:${steamid}`, JSON.stringify(items), 'EX', 60);
+    return null;
+  }
+
+  await redis.set(`profileitems:${steamid}`, JSON.stringify(items), 'EX', 3600);
+  return items;
 }

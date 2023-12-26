@@ -1,9 +1,4 @@
 <script lang="ts">
-  import windowsIcon from '@iconify-icons/mdi/windows';
-  import macIcon from '@iconify-icons/mdi/apple';
-  import linuxIcon from '@iconify-icons/mdi/linux';
-  import steamDeckIcon from '@iconify-icons/simple-icons/steamdeck';
-  import vrIcon from '@iconify-icons/mdi/virtual-reality';
   import prettyMilliseconds from 'pretty-ms';
 	import type { SteamYearInReview } from "$lib/types";
 	import BigStat from '../../../../lib/components/BigStat.svelte';
@@ -20,7 +15,6 @@
 
   let platforms = [
     {
-      icon: windowsIcon,
       name: 'Windows',
       percent: totalStats.windows_playtime_percentagex100 / 100,
       playtime: getPlaytime('windows'),
@@ -29,7 +23,6 @@
       color: '#d67070'
     },
     {
-      icon: macIcon,
       name: 'Mac OS',
       percent: totalStats.macos_playtime_percentagex100 / 100,
       playtime: getPlaytime('macos'),
@@ -38,7 +31,6 @@
       color: '#46ab46'
     },
     {
-      icon: linuxIcon,
       name: 'Linux',
       percent: totalStats.linux_playtime_percentagex100 / 100,
       playtime: getPlaytime('linux'),
@@ -47,7 +39,6 @@
       color: '#683db4'
     },
     {
-      icon: steamDeckIcon,
       name: 'Steam Deck',
       percent: totalStats.deck_playtime_percentagex100 / 100,
       playtime: getPlaytime('deck'),
@@ -56,7 +47,6 @@
       color: '#3898b0'
     },
     {
-      icon: vrIcon,
       name: 'Virtual Reality',
       percent: totalStats.vr_playtime_percentagex100 / 100,
       playtime: getPlaytime('vr'),

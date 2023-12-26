@@ -1,7 +1,7 @@
 <script lang="ts">
   import prettyMilliseconds from 'pretty-ms';
 	import type { SteamYearInReview } from "$lib/types";
-	import BigStat from '../../../../lib/components/BigStat.svelte';
+	import BigStat from '$lib/components/BigStat.svelte';
 
   export let yearInReview: SteamYearInReview;
   let totalStats = yearInReview.stats.playtime_stats.total_stats;

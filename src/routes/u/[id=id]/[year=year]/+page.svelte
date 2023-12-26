@@ -56,6 +56,15 @@
   <meta content={shareContent.text} property="og:description" />
   <meta content={`https://steam.exposed/u/${data.profile.steamid}/${data.year}`} property="og:url" />
   <meta property="twitter:card" content="summary">
+  {#if data.profileItems && data.profileItems.avatar_frame.appid}
+    {#if data.profileItems.animated_avatar.appid}
+      <link rel="preload" as="image" href={`https://cdn.akamai.steamstatic.com/steamcommunity/public/images/${data.profileItems.animated_avatar.image_small}`}>
+    {/if}
+    {#if data.profileItems.avatar_frame.appid}
+      <link rel="preload" as="image" href={`https://cdn.akamai.steamstatic.com/steamcommunity/public/images/${data.profileItems.avatar_frame.image_small}`}>
+    {/if}
+  {/if}
+  <link rel="preload" as="image" href={data.profile.avatarfull}>
   <title>{data.profile.personaname}'s {data.year} Year in Review - steam.exposed</title>
 </svelte:head>
 
@@ -63,7 +72,22 @@
 
 <main class="flex flex-col max-w-6xl mx-auto py-10 px-4 md:px-10 gap-10 pt-[6.5rem]">
   <div class="flex flex-col items-center gap-10 md:flex-row">
-    <img src={data.profile.avatarfull} class="w-44 h-44 rounded" alt={data.profile.personaname} />
+    <div class="relative w-44 h-44">
+      {#if data.profileItems && data.profileItems.avatar_frame.appid}
+        <img
+          src={`https://cdn.akamai.steamstatic.com/steamcommunity/public/images/${data.profileItems.avatar_frame.image_small}`}
+          class="pointer-events-none absolute top-0 bottom-0 left-0 right-0 scale-[1.22]"
+          alt={`${data.profile.personaname}'s Avatar Frame`}
+        />
+      {/if}
+      <img
+        src={data.profileItems && data.profileItems.animated_avatar.appid
+          ? `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/${data.profileItems.animated_avatar.image_small}`
+          : data.profile.avatarfull}
+        class="top-0 bottom-0 left-0 right-0"
+        alt={data.profile.personaname}
+      />
+    </div>
     <div class="flex flex-col items-center md:items-start">
       <h2 class="text-5xl font-bold  text-white">{data.profile.personaname}</h2>
       <span class="text-3xl">{data.year} Year In Review</span>

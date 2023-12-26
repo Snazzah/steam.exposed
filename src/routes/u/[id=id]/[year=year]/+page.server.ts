@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getAppInfo, getAppNames, getTags, getUser, getYearInReview } from '$lib/server/data';
+import { getAppInfo, getAppNames, getProfileItems, getTags, getUser, getYearInReview } from '$lib/server/data';
 import type { SteamYearInReview } from '$lib/types';
 
 async function getData(yearInReview: SteamYearInReview) {
@@ -38,5 +38,11 @@ export const load: PageServerLoad = async ({ params, request}) => {
   const userAgent = request.headers.get('User-Agent');
   const isBot = !userAgent || /bot|chatgpt|facebookexternalhit|WhatsApp|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|MetaInspector/i.test(userAgent)
 
-  return { profile, year: params.year, yearInReview, data: isBot ? null : getData(yearInReview) };
+  return {
+    profile,
+    profileItems: isBot ? null : await getProfileItems(params.id),
+    year: params.year,
+    yearInReview,
+    data: isBot ? null : getData(yearInReview)
+  };
 };

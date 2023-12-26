@@ -47,11 +47,44 @@ export interface SteamAppInfo {
   fullgame?: {
     appid: string;
     name: string;
-  },
+  };
+}
+
+export interface SteamProfileItem {
+  communityitemid: string;
+  name: string;
+  item_title: string;
+  item_description: string;
+  appid: number;
+  item_type: number;
+  item_class: number;
+};
+
+export interface SteamProfileItems {
+  profile_background: SteamProfileItem & {
+    image_large: string;
+    movie_webm: string;
+    movie_mp4: string;
+    movie_webm_small: string;
+    movie_mp4_small: string;
+  };
+  mini_profile_background: SteamProfileItem & {
+    image_large: string;
+    movie_webm: string;
+    movie_mp4: string;
+  };
+  avatar_frame: SteamProfileItem & {
+    image_small: string;
+    image_large: string;
+  };
+  animated_avatar: SteamProfileItem & {
+    image_small: string;
+    image_large: string;
+  };
 }
 
 export async function fetchSteamSummary(steamid: string) {
-  logInfo(`Fetching summary for for steamid ${steamid}`);
+  logInfo(`Fetching summary for steamid ${steamid}`);
   const response = await fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${STEAM_WEBKEY}&steamids=${steamid}`);
   if (response.status !== 200) return null;
   const text = await response.text();
@@ -96,4 +129,12 @@ export async function fetchVanity(vanityUrl: string) {
   if (response.status !== 200) return null;
   const data: any = await response.json();
   return data.response as { success: 42, message: "No match" } | { steamid: "76561198063017988", success: 1 };
+}
+
+export async function fetchProfileItems(steamid: string) {
+  logInfo(`Fetching profile items for steamid ${steamid}`);
+  const response = await fetch(`https://api.steampowered.com/IPlayerService/GetProfileItemsEquipped/v1/?key=${STEAM_WEBKEY}&steamid=${steamid}`);
+  if (response.status !== 200) return null;
+  const text = await response.text();
+  return JSON.parse(text).response as SteamProfileItems;
 }
