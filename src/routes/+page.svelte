@@ -4,7 +4,7 @@
   import menuIcon from '@iconify-icons/mdi/menu-down';
   import checkIcon from '@iconify-icons/mdi/check';
 	import Footer from "$lib/components/Footer.svelte";
-	import { MIN_YEAR, getLatestYear, inviteUrlToSteamID } from "$lib/util";
+	import { MIN_YEAR, getLatestYear, resolveToURL } from "$lib/util";
 	import { clickOutside } from "$lib/actions";
 	import { onMount } from "svelte";
 	import { updated } from "$app/stores";
@@ -21,55 +21,9 @@
   let input = '';
   let inputErrored = false;
   function submitInput() {
-    if (input.includes('://s.team/')) {
-      const shareUrlMatch = input.match(/^\s*https?:\/\/s\.team\/y(\d{2})\/([bcdfghjkmnpqrtvw-]{4,9})/);
-      if (shareUrlMatch) return location.href = `/u/${inviteUrlToSteamID(shareUrlMatch[2])}/${2000 + parseInt(shareUrlMatch[1])}`;
-
-      const shortUrlMatch = input.match(/^\s*https?:\/\/s\.team\/p\/([bcdfghjkmnpqrtvw-]{4,9})/);
-      if (shortUrlMatch) return location.href = `/u/${inviteUrlToSteamID(shortUrlMatch[1])}/${selectedYear}`;
-    }
-
-    if (input.includes('://store.steampowered.com/yearinreview/')) {
-      const yearInReviewUrl = input.match(/^\s*https?:\/\/store\.steampowered\.com\/yearinreview\/([0-9]+)\/(20[0-9]{2})/);
-      if (yearInReviewUrl) return location.href = `/u/${yearInReviewUrl[1]}/${yearInReviewUrl[2]}`;
-    }
-
-    if (input.includes('://steamcommunity.com/')) {
-      const vanityUrl = input.match(/^\s*https?:\/\/steamcommunity\.com\/id\/([A-Za-z0-9_-]{2,32})/);
-      if (vanityUrl) return location.href = `/id/${vanityUrl[1]}?year=${selectedYear}`;
-
-      const profileUrl = input.match(/^\s*https?:\/\/steamcommunity\.com\/profiles\/([0-9]+)/);
-      if (profileUrl) return location.href = `/u/${profileUrl[1]}/${selectedYear}`;
-
-      const userUrl = input.match(/^\s*https?:\/\/steamcommunity\.com\/user\/([bcdfghjkmnpqrtvw-]{4,9})/);
-      if (userUrl) return location.href = `/u/${inviteUrlToSteamID(userUrl[1])}/${selectedYear}`;
-    }
-
-    if (input.includes('://steamdb.info/calculator/')) {
-      const steamDbMatch = input.match(/^\s*https?:\/\/steamdb\.info\/calculator\/([0-9]+)/);
-      if (steamDbMatch) return location.href = `/u/${steamDbMatch[1]}/${selectedYear}`;
-    }
-
-    if (input.startsWith('STEAM_1:')) {
-      const steam2Match = input.match(/^STEAM_1:([01]):(\d+)$/);
-      if (steam2Match) {
-        const accountId = BigInt((parseInt(steam2Match[2], 10) * 2) + parseInt(steam2Match[1], 10));
-        return location.href = `/u/${(1n << 56n) | (1n << 52n) | (1n << 32n) | accountId}/${selectedYear}`;
-      }
-    }
-
-    if (input.startsWith('[U:1:')) {
-      const steam3Match = input.match(/^\[U:1:(\d+)\]$/);
-      if (steam3Match) {
-        const accountId = BigInt(steam3Match[1]);
-        return location.href = `/u/${(1n << 56n) | (1n << 52n) | (1n << 32n) | accountId}/${selectedYear}`;
-      }
-    }
-
-    if (/^[0-9]+$/.test(input) && BigInt(input) >= 76561197962146232n) return location.href = `/u/${input}/${selectedYear}`;
-    if (/^[A-Za-z0-9_-]{2,32}$/.test(input)) return location.href = `/id/${input}?year=${selectedYear}`;
-
-    inputErrored = true;
+    const url = resolveToURL(input, selectedYear);
+    if (!url) inputErrored = true;
+    else location.href = url;
   }
 
   let errorPrompt = '';
