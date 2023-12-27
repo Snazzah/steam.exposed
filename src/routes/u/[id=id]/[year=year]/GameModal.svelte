@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SteamYearInReview } from "$lib/types";
+	import { relativeTime } from "$lib/util";
 	import BigStat from "../../../../lib/components/BigStat.svelte";
 	import prettyMilliseconds from "pretty-ms";
 	import Button from "$lib/components/Button.svelte";
@@ -12,7 +13,7 @@
   import controllerIcon from '@iconify-icons/mdi/controller';
   import steamDeckIcon from '@iconify-icons/simple-icons/steamdeck';
   import vrIcon from '@iconify-icons/mdi/virtual-reality';
-	import { relativeTime } from "$lib/util";
+	import GameModalMonthChart from "./GameModalMonthChart.svelte";
 
   export let apps: Record<number, string> = {};
   export let yearInReview: SteamYearInReview;
@@ -131,6 +132,7 @@
       {game.total_sessions.toLocaleString()}
     </BigStat>
   </div>
+  <GameModalMonthChart {appId} {yearInReview} />
 </div>
 
 <style lang="scss">

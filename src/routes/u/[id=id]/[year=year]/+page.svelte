@@ -50,6 +50,7 @@
 </script>
 
 <svelte:head>
+  <title>{data.profile.personaname}'s {data.year} Year in Review - steam.exposed</title>
   <meta content={shareContent.title} property="og:title" />
   <meta content={data.profile.avatarfull} property="og:image" />
   <meta content="image/png" property="og:image:type" />
@@ -65,7 +66,6 @@
     {/if}
   {/if}
   <link rel="preload" as="image" href={data.profile.avatarfull}>
-  <title>{data.profile.personaname}'s {data.year} Year in Review - steam.exposed</title>
 </svelte:head>
 
 <Header />
