@@ -33,6 +33,7 @@
 </script>
 
 <svelte:head>
+  <title>steam.exposed</title>
   <meta content="steam.exposed" property="og:title" />
   <meta content="https://steam.exposed/images/social.png" property="og:image" />
   <meta content="image/png" property="og:image:type" />

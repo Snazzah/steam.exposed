@@ -7,8 +7,4 @@
 	// import { updated } from '$app/stores';
 </script>
 
-<svelte:head>
-  <title>steam.exposed</title>
-</svelte:head>
-
 <slot />
