@@ -29,7 +29,7 @@
   <h3 class="text-3xl font-extrabold text-white mb-2">Playtime Breakdown</h3>
   <div class={`rounded-md px-4 py-2 transition-colors ${selectedMonthIndex === -1 ? 'bg-black/50' : 'bg-neutral-700'}`}>
     {#if selectedMonthIndex === -1}
-    Hover over a month column for more information.
+      Hover over a month column for more information.
     {:else}
       {@const month = yearInReview.stats.playtime_stats.months[selectedMonthIndex]}
       {@const date = new Date(1e3 * (month.rtime_month + 86400))}

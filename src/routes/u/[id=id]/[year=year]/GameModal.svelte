@@ -14,6 +14,7 @@
   import steamDeckIcon from '@iconify-icons/simple-icons/steamdeck';
   import vrIcon from '@iconify-icons/mdi/virtual-reality';
 	import GameModalMonthChart from "./GameModalMonthChart.svelte";
+	import CopyButton from "$lib/components/CopyButton.svelte";
 
   export let apps: Record<number, string> = {};
   export let yearInReview: SteamYearInReview;
@@ -67,12 +68,15 @@
   </div>
 </div>
 
-<div class="flex flex-col p-4 gap-8 w-full overflow-y-auto">
+<div class="flex flex-col p-4 gap-8 w-full overflow-y-auto light-scrollbar">
   <div class="flex flex-col gap-4">
     <div class="flex flex-col gap-4 md:flex-row">
       <dl class="flex flex-col w-full">
         <dt class="font-bold text-white text-lg">App ID</dt>
-        <dd><code>{appId}</code></dd>
+        <dd class="flex gap-2 items-center">
+          <code class="select-all">{appId}</code>
+          <CopyButton text={String(appId)} />
+        </dd>
       </dl>
       <dl class="flex flex-col w-full">
         <dt class="font-bold text-white text-lg">Release Date</dt>

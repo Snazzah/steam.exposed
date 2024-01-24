@@ -1,6 +1,7 @@
 <script lang="ts">
+	import BigStat from "$lib/components/BigStat.svelte";
 	import type { SteamYearInReview } from "$lib/types";
-	import PercentChart from './PercentChart.svelte';
+	import PercentChart from '$lib/components/PercentChart.svelte';
 
   export let yearInReview: SteamYearInReview;
   let games = yearInReview.stats.playtime_stats.game_summary;
@@ -43,6 +44,20 @@
 
 <div class="flex flex-col gap-8">
   <h3 class="text-3xl font-extrabold text-white mb-2">Games</h3>
+  <div class="flex gap-8 justify-around flex-wrap">
+    <BigStat name="Games Played" subtext={`(${yearInReview.stats.playtime_stats.summary_stats.total_games_with_achievements.toLocaleString()} games with achievements)`}>
+      {games.filter((g) => !g.demo && !g.playtest).length.toLocaleString()}
+    </BigStat>
+    <BigStat name="New Games Played">
+      {games.filter((g) => !g.demo && !g.playtest && g.new_this_year).length.toLocaleString()}
+    </BigStat>
+    <BigStat name="Demos Played">
+      {games.filter((g) => g.demo).length.toLocaleString()}
+    </BigStat>
+    <BigStat name="Playtests Played">
+      {games.filter((g) => g.playtest).length.toLocaleString()}
+    </BigStat>
+  </div>
   <div class="flex flex-col gap-4">
     <h3 class="text-2xl font-bold text-white mb-2">Type</h3>
     <PercentChart

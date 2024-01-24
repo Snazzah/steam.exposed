@@ -1,8 +1,8 @@
 <script lang="ts">
   import prettyMilliseconds from 'pretty-ms';
 	import type { SteamYearInReview } from "$lib/types";
-	import BigStat from '../../../../lib/components/BigStat.svelte';
-	import PercentChart from './PercentChart.svelte';
+	import BigStat from '$lib/components/BigStat.svelte';
+	import PercentChart from '$lib/components/PercentChart.svelte';
 
   export let yearInReview: SteamYearInReview;
   let totalStats = yearInReview.stats.playtime_stats.total_stats;

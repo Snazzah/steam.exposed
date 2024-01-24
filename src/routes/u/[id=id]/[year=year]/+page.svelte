@@ -38,6 +38,7 @@
       : [
         `${playtimeStats.game_summary.length.toLocaleString()} games`,
         `${playtimeStats.total_stats.total_sessions.toLocaleString()} sessions`,
+        `${playtimeStats.summary_stats.total_achievements.toLocaleString()} achievements`,
         `${prettyMilliseconds(playtimeStats.total_stats.total_playtime_seconds * 1000, { compact: true, verbose: true })} of total playtime`
       ].join(', '),
 		url: shareUrl
@@ -89,7 +90,7 @@
       />
     </div>
     <div class="flex flex-col items-center md:items-start">
-      <h2 class="text-5xl font-bold  text-white">{data.profile.personaname}</h2>
+      <h2 class="text-5xl font-bold text-white">{data.profile.personaname}</h2>
       <span class="text-3xl">{data.year} Year In Review</span>
       <div class="flex flex-col md:flex-row text-sm gap-2 justify-center items-center mt-2 relative">
         {#if $copyShareUrlTooltip !== 0}
@@ -107,7 +108,7 @@
           on:click={() => {
             copyShareUrlTooltip.set(1, { duration: 0 });
             copyShareUrlTooltip.set(0);
-            navigator.clipboard.writeText(shareUrl)
+            navigator.clipboard.writeText(shareUrl);
           }}
         >
           <Icon icon={linkIcon} />
@@ -166,10 +167,10 @@
           <span class="text-neutral-400 text-center">The data for {data.year}'s year in review wound up empty. The account must set their Year in Review's <b>Page Visibility</b> to <b>Public</b>.</span>
         </div>
       {:else}
-        <div class="flex gap-2 whitespace-nowrap w-full">
+        <div class="flex gap-2 whitespace-nowrap w-full flex-wrap md:flex-nowrap justify-center md:justify-start">
           {#each tabs as tab, i}
             <button
-              class="_tab"
+              class="_tab w-[calc(50%-4px)] md:w-fit"
               class:--active={activeTab === i}
               on:click={() => activeTab = i}
             >
