@@ -1,11 +1,10 @@
 <script lang="ts">
 	import type { PlaytimeStatsGameSummary, SteamYearInReview } from "$lib/types";
 	import { clickOutside } from "$lib/actions";
-	import Portal from "svelte-portal";
+	import { writable } from "svelte/store";
+	import { createEventDispatcher } from 'svelte';
   import fuzzy from 'fuzzy';
 	import GameGridChild from "./GameGridChild.svelte";
-	import { fade, fly } from "svelte/transition";
-	import GameModal from "./GameModal.svelte";
 	import prettyMilliseconds from "pretty-ms";
 	import Icon from "@iconify/svelte";
   import menuIcon from '@iconify-icons/mdi/menu-down';
@@ -18,8 +17,9 @@
   import linuxIcon from '@iconify-icons/mdi/linux';
   import steamDeckIcon from '@iconify-icons/simple-icons/steamdeck';
   import vrIcon from '@iconify-icons/mdi/virtual-reality';
-	import { writable } from "svelte/store";
 	import ThreeWaySwitch from "$lib/components/ThreeWaySwitch.svelte";
+
+	const dispatch = createEventDispatcher<{ select: number }>();
 
   interface SortInformation {
     playtime: number; playtimeEstimated: boolean; rank: number;
@@ -144,11 +144,6 @@
 
     const results = fuzzy.filter(query, games, { extract(g) { return `${apps[g.appid]} (${g.appid})`; }});
     return results.map((r) => r.original);
-  }
-
-  let selectedApp: number | null = null;
-  function onModalClick (this: any, e: any) {
-    if (e.target === this) selectedApp = null;
   }
 </script>
 
@@ -287,7 +282,7 @@
     <GameGridChild
       name={apps[game.appid]}
       {game}
-      on:click={() => selectedApp = game.appid}
+      on:click={() => dispatch('select', game.appid)}
       footer={formatSortInfo(game, sortInfo)}
     />
   {/each}
@@ -295,21 +290,3 @@
     <div class="w-full text-center italic text-neutral-600 py-10">No games found with the filters provided.</div>
   {/if}
 </div>
-
-{#if selectedApp !== null}
-  <Portal target="body">
-    <div
-      transition:fade={{ duration: 100 }}
-      class="fixed top-0 bottom-0 left-0 right-0 bg-black bg-opacity-25 backdrop-blur-sm select-none flex items-end md:items-center justify-center md:px-8 z-30"
-      aria-hidden="true"
-      on:click={onModalClick}
-    >
-      <div
-        transition:fly={{ duration: 250 , y: 32 }}
-        class="w-[1024px] max-h-[calc(100svh-6rem)] relative text-neutral-200 bg-neutral-900 rounded-t md:rounded-b shadow-lg flex-col justify-start items-start inline-flex overflow-hidden"
-      >
-        <GameModal appId={selectedApp} {apps} {yearInReview} />
-      </div>
-    </div>
-  </Portal>
-{/if}

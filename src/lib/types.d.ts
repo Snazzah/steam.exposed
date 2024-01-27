@@ -103,23 +103,6 @@ export interface YearInReviewRanking {
   }[];
 }
 
-export interface PlaytimeStatsGameSummary {
-  appid: number;
-  new_this_year: boolean;
-  rtime_first_played_lifetime: number;
-  demo: boolean;
-  playtest: boolean;
-  played_vr: boolean;
-  played_deck: boolean;
-  played_controller: boolean;
-  played_linux: boolean;
-  played_mac: boolean;
-  played_windows: boolean;
-  total_playtime_percentagex100: number;
-  total_sessions: number;
-  rtime_release_date?: number;
-}
-
 export interface Game {
   appid: number;
   stats: YearInReviewGameStats;

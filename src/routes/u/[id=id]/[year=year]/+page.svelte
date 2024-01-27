@@ -15,20 +15,30 @@
 	import OverallStatistics from './OverallStatistics.svelte';
 	import PlatformSection from './PlatformSection.svelte';
 	import GamesSection from './GamesSection.svelte';
+	import PlaytimeStreak from './PlaytimeStreak.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import { steamIdToInviteUrl } from '$lib/util';
+	import GameModal from './GameModal.svelte';
+	import Portal from 'svelte-portal';
+	import { fade, fly } from 'svelte/transition';
 
   export let data: PageData;
   const available = Object.keys(data.yearInReview).length !== 0;
 
   let tabs = [
     'Overview',
-    'Game List'
+    'Game List',
+    'Playtime Streak'
   ];
   let activeTab = 0;
   let playtimeStats = !available ? null : data.yearInReview.stats.playtime_stats;
+
+  let selectedApp: number | null = null;
+  function onModalClick(this: any, e: any) {
+    if (e.target === this) selectedApp = null;
+  }
 
   const shareUrl = `https://steam.exposed/y${data.year.slice(2)}/${steamIdToInviteUrl(data.profile.steamid)}`
 	const shareContent = {
@@ -45,6 +55,7 @@
 	};
 	const copyShareUrlTooltip = tweened(0, { duration: 500, easing: quartIn });
   let shareAvailable = false;
+
   onMount(() => {
     shareAvailable = 'share' in navigator && navigator.canShare(shareContent);
   });
@@ -184,8 +195,29 @@
           <PlatformSection yearInReview={data.yearInReview} />
           <TagStatistics tags={result.tags} yearInReview={data.yearInReview} />
         {:else if activeTab === 1}
-          <GameGrid apps={result.apps} yearInReview={data.yearInReview} />
+          <GameGrid apps={result.apps} yearInReview={data.yearInReview} on:select={(e) => selectedApp = e.detail} />
+        {:else if activeTab === 2}
+          <PlaytimeStreak apps={result.apps} yearInReview={data.yearInReview} on:select={(e) => selectedApp = e.detail} />
         {/if}
+      {/if}
+
+      <!-- Modal Portal -->
+      {#if selectedApp !== null}
+        <Portal target="body">
+          <div
+            transition:fade={{ duration: 100 }}
+            class="fixed top-0 bottom-0 left-0 right-0 bg-black bg-opacity-25 backdrop-blur-sm select-none flex items-end md:items-center justify-center md:px-8 z-30"
+            aria-hidden="true"
+            on:click={onModalClick}
+          >
+            <div
+              transition:fly={{ duration: 250 , y: 32 }}
+              class="w-[1024px] max-h-[calc(100svh-6rem)] relative text-neutral-200 bg-neutral-900 rounded-t md:rounded-b shadow-lg flex-col justify-start items-start inline-flex overflow-hidden"
+            >
+              <GameModal appId={selectedApp} apps={result.apps} yearInReview={data.yearInReview} />
+            </div>
+          </div>
+        </Portal>
       {/if}
     {:catch error}
       <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">

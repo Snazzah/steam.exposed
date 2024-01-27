@@ -44,7 +44,7 @@
   class="bg-cover bg-no-repeat bg-center h-36 md:h-56 w-full flex flex-col items-start justify-between bg-slate-600/25"
   style:background-image={`url(https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_hero.jpg)`}
 >
-  <div class="flex w-full items-center justify-end gap-2 p-2">
+  <div class="flex w-full items-center justify-end gap-2 p-2 mb-10">
     {#if game.demo}
       <span class="text-xs md:text-sm px-2 bg-green-400 text-black rounded _badge">DEMO</span>
     {/if}

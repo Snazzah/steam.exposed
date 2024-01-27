@@ -20,7 +20,7 @@
   const PERCENT_STEP = 20;
   const Y_STEP_AMOUNT = 4;
   const topPercentage = Math.ceil((Math.max(...data.map((m) => m.value)) * 100) / PERCENT_STEP) * PERCENT_STEP;
-  const ySteps = ' '.repeat(4).split('').map((_, i) => (topPercentage / Y_STEP_AMOUNT) * (i + 1)).reverse();
+  const ySteps = ' '.repeat(Y_STEP_AMOUNT).split('').map((_, i) => (topPercentage / Y_STEP_AMOUNT) * (i + 1)).reverse();
 
   let selectedMonthIndex = -1;
 </script>
