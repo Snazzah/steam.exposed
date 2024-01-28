@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
-	import { browser } from "$app/environment";
 	import { autoPlacement, offset, shift } from 'svelte-floating-ui/dom';
 	import { createFloatingActions } from 'svelte-floating-ui';
 	import Portal from 'svelte-portal';
 	import type { PlaytimeStatsGameSummary } from "$lib/types";
 	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
+	import { getGameAsset } from '$lib/util';
 
   export let name: string | undefined = undefined;
   export let game: PlaytimeStatsGameSummary;
@@ -14,16 +14,9 @@
 
   let coverUrl = '';
   let element: HTMLButtonElement;
-	const loadCover = () => {
-		if (!browser) return;
-		const img = new Image();
-		img.onload = () => coverUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900.jpg`;
-    img.onerror = () => {
-      const img = new Image();
-      img.onload = () => coverUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/portrait.png`;
-      img.src = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/portrait.png`;
-    }
-		img.src = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900.jpg`;
+	const loadCover = async () => {
+		const asset = await getGameAsset(game.appid, ['libraryCover', 'portrait']);
+    if (asset) coverUrl = asset;
 	};
 
   onMount(() => {

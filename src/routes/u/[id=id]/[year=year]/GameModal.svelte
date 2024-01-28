@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SteamYearInReview } from "$lib/types";
-	import { relativeTime } from "$lib/util";
+	import { getGameAsset, relativeTime } from "$lib/util";
 	import BigStat from "../../../../lib/components/BigStat.svelte";
 	import prettyMilliseconds from "pretty-ms";
 	import Button from "$lib/components/Button.svelte";
@@ -15,6 +15,7 @@
   import vrIcon from '@iconify-icons/mdi/virtual-reality';
 	import GameModalMonthChart from "./GameModalMonthChart.svelte";
 	import CopyButton from "$lib/components/CopyButton.svelte";
+	import { onMount } from "svelte";
 
   export let apps: Record<number, string> = {};
   export let yearInReview: SteamYearInReview;
@@ -36,13 +37,21 @@
   });
   const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'always' });
 
+  let heroUrl = '';
+	const loadHero = async () => {
+		const asset = await getGameAsset(game.appid, ['libraryHero']);
+    if (asset) heroUrl = asset;
+	};
+
   // TODO show playtime streak & ranks
+
+  onMount(() => loadHero());
 </script>
 
 
 <div
   class="bg-cover bg-no-repeat bg-center h-36 md:h-56 w-full flex flex-col items-start justify-between bg-slate-600/25"
-  style:background-image={`url(https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_hero.jpg)`}
+  style:background-image={heroUrl ? `url(${heroUrl})` : undefined}
 >
   <div class="flex w-full items-center justify-end gap-2 p-2 mb-10">
     {#if game.demo}

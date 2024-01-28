@@ -19,7 +19,7 @@
 
 <div class="flex flex-col gap-8">
   <BigStat name="Longest Playtime Streak">
-    {playtimeStreak.longest_consecutive_days} Days
+    {playtimeStreak.longest_consecutive_days} Day{playtimeStreak.longest_consecutive_days === 1 ? '' : 's'}
   </BigStat>
   <div class="flex justify-between pt-2 border-t-2 border-dashed font-bold">
     <span>{dtf.format(playtimeStreak.rtime_start * 1000)}</span>

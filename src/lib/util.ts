@@ -1,3 +1,6 @@
+import { browser } from "$app/environment";
+import type { YearInReviewGameStats } from "./types";
+
 export function getLatestYear() {
   const currentYear = new Date().getFullYear();
   const nextDate = new Date(`December 15 ${currentYear}`);
@@ -113,4 +116,72 @@ export function resolveToURL(input: string, year = getLatestYear()) {
   if (/^[A-Za-z0-9_-]{2,32}$/.test(input)) return `/id/${input}?year=${year}`;
 
   return null;
+}
+
+export function calculateBarGraph(data: { value: number }[], stepAmount = 4, percentStep = 20) {
+  const topPercentage = Math.ceil((Math.max(...data.map((m) => m.value)) * 100) / percentStep) * percentStep;
+  const ySteps = ' '.repeat(stepAmount).split('').map((_, i) => (topPercentage / stepAmount) * (i + 1)).reverse();
+
+  return { topPercentage, ySteps };
+}
+
+interface AssetCacheItem {
+  available: boolean,
+  fetchedAt: number
+}
+
+interface AssetCacheGame {
+  portrait: AssetCacheItem | null;
+  libraryCover: AssetCacheItem | null;
+  libraryHero: AssetCacheItem | null;
+}
+
+const gameAssetCache: Record<string, AssetCacheGame> = {};
+const CACHE_TTL = 1000 * 60 * 60 * 24 * 7;
+
+export async function getGameAsset(appId: number, assetList: (keyof AssetCacheGame)[]) {
+  if (!browser) throw new Error('Tried to use getGameAsset in server');
+  const game = gameAssetCache[String(appId)] || (gameAssetCache[String(appId)] = { portrait: null, libraryCover: null, libraryHero: null });
+  const now = Date.now();
+
+  const assetUrls: Record<string, string> = {
+    portrait: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/portrait.png`,
+    libraryCover: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_600x900.jpg`,
+    libraryHero: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_hero.jpg`
+  }
+
+  let selectedType: string | null = null;
+  for (const assetType of assetList) {
+    if (game[assetType] !== null && game[assetType]!.fetchedAt > (now - CACHE_TTL)) {
+      if (game[assetType]?.available) {
+        selectedType = assetType;
+        break;
+      }
+      continue;
+    }
+
+    const available = await new Promise<boolean>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = assetUrls[assetType];
+    });
+
+    game[assetType] = { available, fetchedAt: Date.now() };
+
+    if (available) {
+      selectedType = assetType;
+      break;
+    }
+    continue;
+  }
+
+  return selectedType ? assetUrls[selectedType] : null;
+}
+
+export function makePlaytimeFunction(stats: YearInReviewGameStats) {
+  return (type: 'vr' | 'deck' | 'controller' | 'linux' | 'macos' | 'windows') => {
+    const percent = stats[`${type}_playtime_percentagex100`] / stats.total_playtime_percentagex100;
+    return stats.total_playtime_seconds * percent;
+  }
 }

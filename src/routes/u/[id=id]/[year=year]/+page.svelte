@@ -23,6 +23,7 @@
 	import GameModal from './GameModal.svelte';
 	import Portal from 'svelte-portal';
 	import { fade, fly } from 'svelte/transition';
+	import MonthView from './MonthView.svelte';
 
   export let data: PageData;
   const available = Object.keys(data.yearInReview).length !== 0;
@@ -30,6 +31,7 @@
   let tabs = [
     'Overview',
     'Game List',
+    'By Month',
     'Playtime Streak'
   ];
   let activeTab = 0;
@@ -192,11 +194,13 @@
         {#if activeTab === 0}
           <OverallStatistics yearInReview={data.yearInReview} />
           <GamesSection yearInReview={data.yearInReview} />
-          <PlatformSection yearInReview={data.yearInReview} />
+          <PlatformSection yearInReview={data.yearInReview} stats={data.yearInReview.stats.playtime_stats.total_stats} />
           <TagStatistics tags={result.tags} yearInReview={data.yearInReview} />
         {:else if activeTab === 1}
           <GameGrid apps={result.apps} yearInReview={data.yearInReview} on:select={(e) => selectedApp = e.detail} />
         {:else if activeTab === 2}
+          <MonthView apps={result.apps} yearInReview={data.yearInReview} on:select={(e) => selectedApp = e.detail} />
+        {:else if activeTab === 3}
           <PlaytimeStreak apps={result.apps} yearInReview={data.yearInReview} on:select={(e) => selectedApp = e.detail} />
         {/if}
       {/if}
@@ -236,11 +240,11 @@
     @apply px-4 py-2 rounded-md bg-neutral-700 transition-all self-stretch;
 
     &:hover {
-      @apply bg-neutral-600
+      @apply bg-neutral-600;
     }
 
     &:active {
-      @apply scale-95
+      @apply scale-95;
     }
 
     &.--active {

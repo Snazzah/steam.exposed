@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SteamYearInReview } from "$lib/types";
+	import { calculateBarGraph } from "$lib/util";
 	import prettyMilliseconds from "pretty-ms";
 
   export let yearInReview: SteamYearInReview;
@@ -17,10 +18,7 @@
     month: m.rtime_month,
     value: (m.game_summary.find((g) => g.appid === appId)?.total_playtime_percentagex100 ?? 0) / game.total_playtime_percentagex100
   }));
-  const PERCENT_STEP = 20;
-  const Y_STEP_AMOUNT = 4;
-  const topPercentage = Math.ceil((Math.max(...data.map((m) => m.value)) * 100) / PERCENT_STEP) * PERCENT_STEP;
-  const ySteps = ' '.repeat(Y_STEP_AMOUNT).split('').map((_, i) => (topPercentage / Y_STEP_AMOUNT) * (i + 1)).reverse();
+  const { topPercentage, ySteps } = calculateBarGraph(data);
 
   let selectedMonthIndex = -1;
 </script>
