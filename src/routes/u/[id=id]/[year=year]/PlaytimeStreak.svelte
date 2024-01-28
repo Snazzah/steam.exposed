@@ -8,7 +8,9 @@
 
   export let apps: Record<number, string> = {};
   export let yearInReview: SteamYearInReview;
-  let playtimeStreak = yearInReview.stats.playtime_stats.playtime_streak;
+  const playtimeStreak = yearInReview.stats.playtime_stats.playtime_streak;
+  const gameAmount = playtimeStreak.streak_games.length;
+  const demoGameAmount = playtimeStreak.streak_games.filter((g) => !!yearInReview.stats.playtime_stats.game_summary.find((s) => g.appid === s.appid && s.demo)).length;
 
   const dtf = new Intl.DateTimeFormat(undefined, {
     month: 'long',
@@ -25,6 +27,10 @@
     <span>{dtf.format(playtimeStreak.rtime_start * 1000)}</span>
     <span>{dtf.format((playtimeStreak.rtime_start + (playtimeStreak.longest_consecutive_days * 60 * 60 * 24)) * 1000)}</span>
   </div>
+  <h4 class="text-center text-neutral-300">
+    {gameAmount.toLocaleString()} game{gameAmount === 1 ? '' : 's'} played
+    (including {demoGameAmount.toLocaleString()} demo{demoGameAmount === 1 ? '' : 's'})
+  </h4>
   <div class="flex flex-wrap gap-4 justify-around">
     {#each playtimeStreak.streak_games as streakGame (streakGame.appid)}
       {@const game = yearInReview.stats.playtime_stats.game_summary.find((g) => g.appid === streakGame.appid)}
