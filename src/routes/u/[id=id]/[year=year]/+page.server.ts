@@ -27,7 +27,7 @@ async function getData(yearInReview: SteamYearInReview) {
   return { yearInReview, tags, apps };
 }
 
-export const load: PageServerLoad = async ({ params, request}) => {
+export const load: PageServerLoad = async ({ params, request }) => {
   const profile = await getUser(params.id);
   if (profile === 0) throw error(404, 'User not found');
   else if (profile === null) throw error(500, 'Failed to load profile');

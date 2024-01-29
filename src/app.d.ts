@@ -9,6 +9,7 @@ declare global {
 		interface PageData {
       profile?: SteamSummary;
       profileItems?: SteamProfileItems | null;
+      year?: string;
     }
 		// interface PageState {}
 		// interface Platform {}

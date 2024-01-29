@@ -42,7 +42,7 @@
     if (e.target === this) selectedApp = null;
   }
 
-  const shareUrl = `https://steam.exposed/y${data.year.slice(2)}/${steamIdToInviteUrl(data.profile.steamid)}`
+  const shareUrl = `https://steam.exposed/y${data.year.slice(2)}/${steamIdToInviteUrl(data.profile.steamid)}`;
 	const shareContent = {
 		title: `${data.profile.personaname}'s ${data.year} Year in Review on steam.exposed`,
 		text: !playtimeStats

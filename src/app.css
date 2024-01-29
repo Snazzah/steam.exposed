@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-img {
+img:not([draggable]) {
   user-drag: none;
   user-select: none;
   -moz-user-select: none;

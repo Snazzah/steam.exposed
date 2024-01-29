@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { updated } from '$app/stores';
-	import { page } from '$app/stores';
+	import { page, updated } from '$app/stores';
 	import Icon from "@iconify/svelte";
   import arrowIcon from '@iconify-icons/mdi/menu-right';
 	import { browser } from '$app/environment';

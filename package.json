@@ -26,6 +26,7 @@
 		"@types/jsonwebtoken": "^9.0.5",
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
 		"@typescript-eslint/parser": "^6.0.0",
+		"@wtto00/html2canvas": "^1.4.3",
 		"autoprefixer": "^10.4.16",
 		"dotenv": "^16.3.1",
 		"eslint": "^8.28.0",
