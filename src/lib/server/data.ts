@@ -91,11 +91,11 @@ export async function getTags(lang = 'english'): Promise<SteamTag[]> {
   return tags;
 }
 
-export async function getUser(steamid: string): Promise<SteamSummary | 0 | null> {
+export async function getUser(steamid: string, loggedInUser = false): Promise<SteamSummary | 0 | null> {
   const cached = await redis.get(`user:${steamid}`);
   if (cached) return JSON.parse(cached);
 
-  const summary = await fetchSteamSummary(steamid);
+  const summary = await fetchSteamSummary(steamid, loggedInUser);
   if (summary === undefined) {
     await redis.set(`user:${steamid}`, '0', 'EX', 3600);
     return 0;

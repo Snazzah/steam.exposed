@@ -83,8 +83,8 @@ export interface SteamProfileItems {
   };
 }
 
-export async function fetchSteamSummary(steamid: string) {
-  logInfo(`Fetching summary for steamid ${steamid}`);
+export async function fetchSteamSummary(steamid: string, loggedInUser = false) {
+  logInfo(`Fetching summary for steamid ${steamid}${loggedInUser ? ` (from login)` : ''}`);
   const response = await fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${STEAM_WEBKEY}&steamids=${steamid}`);
   if (response.status !== 200) return null;
   const text = await response.text();
