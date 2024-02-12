@@ -1,11 +1,8 @@
-
-
 <div align=center>
 <a href="https://Breakdowns of Steam's Year in Reviews">
   <img alt="steam.exposed - Breakdowns of Steam's Year in Reviews" src="/static/images/social.png">
 </a>
 </div>
-
 
 ## steam.exposed
 

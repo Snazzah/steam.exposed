@@ -1,5 +1,5 @@
 export function clickOutside(node: HTMLElement, { ignore }: { ignore?: HTMLElement } = {}) {
-  let ignoreElement = ignore;
+	let ignoreElement = ignore;
 
 	const handleClick = (event: MouseEvent) => {
 		if (
