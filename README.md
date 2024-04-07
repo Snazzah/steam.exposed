@@ -1,5 +1,5 @@
 <div align=center>
-<a href="https://Breakdowns of Steam's Year in Reviews">
+<a href="https://steam.exposed/">
   <img alt="steam.exposed - Breakdowns of Steam's Year in Reviews" src="/static/images/social.png">
 </a>
 </div>
