@@ -170,6 +170,6 @@ export async function getProfileItems(steamid: string, skipCache = false): Promi
 	}
 
   const fetchedAt = Date.now();
-	await redis.set(`profileitems:${steamid}`, JSON.stringify({ ...items, _fetchedAt: fetchedAt }), 'EX', 3600);
+	await redis.set(`profileitems:${steamid}`, JSON.stringify({ ...items, _fetchedAt: fetchedAt }));
 	return { ...items, _fetchedAt: fetchedAt };
 }
