@@ -11,7 +11,7 @@ import {
 import type { SteamYearInReview } from '$lib/types';
 import { q } from '$lib/server/queue';
 
-const PROFILE_STALE_TIME = 86400;
+const PROFILE_STALE_TIME = 86400000; // 1 day
 
 async function getData(yearInReview: SteamYearInReview) {
 	const available = Object.keys(yearInReview).length !== 0;
