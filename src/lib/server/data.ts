@@ -157,9 +157,11 @@ export async function getVanityResolution(vanity: string): Promise<string | null
 	return data.steamid;
 }
 
-export async function getProfileItems(steamid: string): Promise<SteamProfileItems | null> {
-	const cached = await redis.get(`profileitems:${steamid}`);
-	if (cached) return JSON.parse(cached);
+export async function getProfileItems(steamid: string, skipCache = false): Promise<(SteamProfileItems & { _fetchedAt: number; }) | null> {
+  if (!skipCache) {
+    const cached = await redis.get(`profileitems:${steamid}`);
+    if (cached) return JSON.parse(cached);
+  }
 
 	const items = await fetchProfileItems(steamid);
 	if (!items) {
@@ -167,6 +169,7 @@ export async function getProfileItems(steamid: string): Promise<SteamProfileItem
 		return null;
 	}
 
-	await redis.set(`profileitems:${steamid}`, JSON.stringify(items), 'EX', 3600);
-	return items;
+  const fetchedAt = Date.now();
+	await redis.set(`profileitems:${steamid}`, JSON.stringify({ ...items, _fetchedAt: fetchedAt }), 'EX', 3600);
+	return { ...items, _fetchedAt: fetchedAt };
 }

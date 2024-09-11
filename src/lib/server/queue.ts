@@ -1,6 +1,6 @@
 import fastq from "fastq";
 import type { queue, done } from "fastq";
-import { getUser } from "./data";
+import { getProfileItems, getUser } from "./data";
 import { logQueue } from "./logger";
 
 type Task = {
@@ -16,6 +16,7 @@ async function worker (task: Task, cb: done) {
     case 'fetchProfile': {
       logQueue(`refetching ${task.steamid}`);
       await getUser(task.steamid, task.loggedIn, true);
+      await getProfileItems(task.steamid, true);
       break;
     }
   }
