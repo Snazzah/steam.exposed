@@ -2,7 +2,7 @@
 	import '@fontsource-variable/inter';
 	import '@fontsource-variable/source-code-pro';
 	import '../app.css';
-  import { PUBLIC_PLAUSIBLE_HOSTNAME, PUBLIC_DOMAIN } from '$env/static/public';
+	import { PUBLIC_PLAUSIBLE_HOSTNAME, PUBLIC_DOMAIN } from '$env/static/public';
 </script>
 
 <svelte:head>

@@ -105,10 +105,13 @@ export async function getTags(lang = 'english'): Promise<SteamTag[]> {
 
 export async function getUser(
 	steamid: string,
-	loggedInUser = false
-): Promise<SteamSummary | 0 | null> {
-	const cached = await redis.get(`user:${steamid}`);
-	if (cached) return JSON.parse(cached);
+	loggedInUser = false,
+  skipCache = false
+): Promise<(SteamSummary & { _fetchedAt: number; }) | 0 | null> {
+  if (!skipCache) {
+    const cached = await redis.get(`user:${steamid}`);
+    if (cached) return JSON.parse(cached);
+  }
 
 	const summary = await fetchSteamSummary(steamid, loggedInUser);
 	if (summary === undefined) {
@@ -118,8 +121,9 @@ export async function getUser(
 
 	if (!summary) return null;
 
-	await redis.set(`user:${steamid}`, JSON.stringify(summary), 'EX', 3600);
-	return summary;
+  const fetchedAt = Date.now();
+	await redis.set(`user:${steamid}`, JSON.stringify({ ...summary, _fetchedAt: fetchedAt }));
+	return { ...summary, _fetchedAt: fetchedAt };
 }
 
 export async function getYearInReview(

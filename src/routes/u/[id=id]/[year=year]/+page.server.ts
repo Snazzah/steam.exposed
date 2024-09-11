@@ -9,6 +9,9 @@ import {
 	getYearInReview
 } from '$lib/server/data';
 import type { SteamYearInReview } from '$lib/types';
+import { q } from '$lib/server/queue';
+
+const PROFILE_STALE_TIME = 86400;
 
 async function getData(yearInReview: SteamYearInReview) {
 	const available = Object.keys(yearInReview).length !== 0;
@@ -46,6 +49,11 @@ export const load: PageServerLoad = async ({ params, request }) => {
 	const profile = await getUser(params.id);
 	if (profile === 0) throw error(404, 'User not found');
 	else if (profile === null) throw error(500, 'Failed to load profile');
+  else if (profile._fetchedAt && Date.now() - profile._fetchedAt > PROFILE_STALE_TIME)
+    q.push({
+      type: 'fetchProfile',
+      steamid: params.id
+    });
 
 	const yearInReview = await getYearInReview(params.id, parseInt(params.year));
 	if (yearInReview === null) throw new Error('Failed to load year in review');
