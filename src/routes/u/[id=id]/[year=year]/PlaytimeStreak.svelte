@@ -37,8 +37,10 @@
 		>
 	</div>
 	<h4 class="text-center text-neutral-300">
-		{gameAmount.toLocaleString()} game{gameAmount === 1 ? '' : 's'} played (including {demoGameAmount.toLocaleString()}
-		demo{demoGameAmount === 1 ? '' : 's'})
+		{gameAmount.toLocaleString()} game{gameAmount === 1 ? '' : 's'} played
+    {#if demoGameAmount > 0}
+      (including {demoGameAmount.toLocaleString()} demo{demoGameAmount === 1 ? '' : 's'})
+    {/if}
 	</h4>
 	<div class="flex flex-wrap gap-4 justify-around">
 		{#each playtimeStreak.streak_games as streakGame (streakGame.appid)}
