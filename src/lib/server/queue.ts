@@ -143,7 +143,7 @@ async function achWorker(task: AchievementTask, cb: done) {
       totalRare: yearAchievements.totalRare,
       gamesWithAchievements: yearAchievements.gamesWithAchievements
     };
-	  await redis.set(`achdata:${task.steamid}:${task.year}`, JSON.stringify(achData), 'EX', ACH_DATA_STALE_TIME);
+	  await redis.set(`achdata:${task.steamid}:${task.year}`, JSON.stringify(achData), 'EX', ACH_DATA_STALE_TIME / 1000);
 
     task.send({
       event: 'end',
