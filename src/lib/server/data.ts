@@ -1,4 +1,4 @@
-import type { GameAchievement, SteamTag, SteamYearInReview } from '$lib/types';
+import type { AchievementData, GameAchievement, SteamTag, SteamYearInReview } from '$lib/types';
 import {
   fetchAchievementPercentages,
 	fetchAppInfo,
@@ -136,6 +136,15 @@ export async function getUser(
 	return { ...summary, _fetchedAt: fetchedAt };
 }
 
+export async function getCachedYearInReview(
+	steamid: string,
+	year: number
+): Promise<SteamYearInReview | null> {
+	const cached = await redis.get(`yearinreview:${steamid}:${year}`);
+	if (cached) return JSON.parse(cached);
+  return null;
+}
+
 export async function getYearInReview(
 	steamid: string,
 	year: number
@@ -182,6 +191,15 @@ export async function getProfileItems(steamid: string, skipCache = false): Promi
 	const fetchedAt = Date.now();
 	await redis.set(`profileitems:${steamid}`, JSON.stringify({ ...items, _fetchedAt: fetchedAt }));
 	return { ...items, _fetchedAt: fetchedAt };
+}
+
+export async function getCachedAchievementData(
+	steamid: string,
+	year: number
+): Promise<AchievementData | null> {
+	const cached = await redis.get(`achdata:${steamid}:${year}`);
+	if (cached) return JSON.parse(cached);
+  return null;
 }
 
 interface GameAchievements {

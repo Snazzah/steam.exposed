@@ -26,6 +26,8 @@
 	import MonthView from './MonthView.svelte';
 	import AchievementsSection from './AchievementsSection.svelte';
 	import type { AchievementData } from '$lib/types';
+	import { SSEClient } from '$lib/sse';
+	import OnMount from '$lib/components/OnMount.svelte';
 
 	export let data: PageData;
 	const available = Object.keys(data.yearInReview).length !== 0;
@@ -60,23 +62,46 @@
 	const copyShareUrlTooltip = tweened(0, { duration: 500, easing: quartIn });
 	let shareAvailable = false;
 
-  let achievementsLoading = true;
-  let achievements: AchievementData | null = null;
+  let achievements: AchievementData | null = data.achievementData;
+  let achievementsLoading = !achievements;
+  let achievementsLoadingText = '';
+  let achievementsLoadingProgress = -1;
   let achievementsError: any = null;
+  const sseClient = new SSEClient();
 
-	onMount(async () => {
+  function onDataLoaded() {
+    if (!achievements) sseClient.connect(`/u/${data.profile.steamid}/${data.year}/_sse`);
+  }
+
+	onMount(() => {
 		shareAvailable = 'share' in navigator && navigator.canShare(shareContent);
 
-    if (data.achievementData) {
-      try {
-        achievements = await data.achievementData;
-      } catch (e) {
-        console.error('Failed to get achievement data', e);
-        achievementsError = e;
-      } finally {
+    sseClient.on('opened', () => console.log('[SSE] Opened'));
+    sseClient.on('retry', ({ attempts }) => console.log('[SSE] Retrying', { attempts }));
+    sseClient.on('closed', () => console.log('[SSE] Closed'));
+    sseClient.on('init', (info) => {
+      if (info.streaming === false) {
         achievementsLoading = false;
+        achievements = info.data;
+        sseClient.close();
       }
-    }
+    });
+    sseClient.on('update', (update) => {
+      if (update.text) achievementsLoadingText = update.text;
+      if (update.progress) achievementsLoadingProgress = update.progress;
+    });
+    sseClient.on('end', (info) => {
+      if (info.error) {
+        achievementsLoading = false;
+        achievementsError = { message: info.error }
+      } else if (info.data) {
+        achievementsLoading = false;
+        achievements = info.data;
+      }
+      sseClient.close();
+    });
+
+    return () => sseClient.close();
 	});
 </script>
 
@@ -213,6 +238,7 @@
           </span>
 				</div>
 			{:else}
+        <OnMount on:mount={onDataLoaded} />
 				<div class="flex gap-2 whitespace-nowrap w-full flex-wrap md:flex-nowrap justify-center md:justify-start">
 					{#each tabs as tab, i}
             {@const isAchTab = tab === 'Achievements'}
@@ -262,8 +288,13 @@
           {#if achievementsLoading}
             <div class="flex flex-col gap-2 justify-center items-center select-none mt-20">
               <img src="/images/spinner.png" alt="Loading" class="w-32 h-32" />
-              <span class="text-sm">Loading achievements...</span>
+              <span class="text-sm">{achievementsLoadingText || 'Loading achievements...'}</span>
               <span class="text-xs">This usually takes a while depending on how many games this person unlocked achievements in.</span>
+              {#if achievementsLoadingProgress !== -1}
+                <div class="relative rounded-full bg-neutral-700 w-full h-2 overflow-hidden">
+                  <div class="h-full bg-blue-400 absolute left-0 transition-all" style:width={`${achievementsLoadingProgress * 100}%`} />
+                </div>
+              {/if}
             </div>
           {:else if achievementsError}
             <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">

@@ -63,6 +63,9 @@ importers:
       dotenv:
         specifier: ^16.3.1
         version: 16.3.1
+      emittery:
+        specifier: ^1.0.3
+        version: 1.0.3
       eslint:
         specifier: ^8.28.0
         version: 8.56.0
@@ -72,6 +75,9 @@ importers:
       eslint-plugin-svelte:
         specifier: ^2.30.0
         version: 2.35.1(eslint@8.56.0)(svelte@4.2.8)
+      eventemitter3:
+        specifier: ^5.0.1
+        version: 5.0.1
       fast-xml-parser:
         specifier: ^4.5.0
         version: 4.5.0
@@ -87,6 +93,9 @@ importers:
       just-split:
         specifier: ^3.2.0
         version: 3.2.0
+      nanoid:
+        specifier: ^5.0.7
+        version: 5.0.7
       postcss-import:
         specifier: ^15.1.0
         version: 15.1.0(postcss@8.4.32)
@@ -809,6 +818,10 @@ packages:
   electron-to-chromium@1.4.615:
     resolution: {integrity: sha512-/bKPPcgZVUziECqDc+0HkT87+0zhaWSZHNXqF8FLd2lQcptpmUFwoCSWjCdOng9Gdq+afKArPdEg/0ZW461Eng==}
 
+  emittery@1.0.3:
+    resolution: {integrity: sha512-tJdCJitoy2lrC2ldJcqN4vkqJ00lT+tOWNT1hBJjO/3FDMJa5TTIiYGCKGkn/WfCyOzUMObeohbVTj00fhiLiA==}
+    engines: {node: '>=14.16'}
+
   es6-promise@3.3.1:
     resolution: {integrity: sha512-SOp9Phqvqn7jtEUxPWdWfWoLmyt2VaJ6MpvP9Comy1MceMXqE6bxvaTu4iaxpYYPzhny28Lc+M87/c2cPK6lDg==}
 
@@ -888,6 +901,9 @@ packages:
   esutils@2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
+
+  eventemitter3@5.0.1:
+    resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -1208,6 +1224,11 @@ packages:
   nanoid@3.3.7:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
+  nanoid@5.0.7:
+    resolution: {integrity: sha512-oLxFY2gd2IqnjcYyOXD8XGCftpGtZP2AbHbOkthDkvRywH5ayNtPVy9YlOPcHckXzbLTCHpkb7FB+yuxKV13pQ==}
+    engines: {node: ^18 || >=20}
     hasBin: true
 
   natural-compare@1.4.0:
@@ -2309,6 +2330,8 @@ snapshots:
 
   electron-to-chromium@1.4.615: {}
 
+  emittery@1.0.3: {}
+
   es6-promise@3.3.1: {}
 
   esbuild@0.19.10:
@@ -2445,6 +2468,8 @@ snapshots:
       '@types/estree': 1.0.5
 
   esutils@2.0.3: {}
+
+  eventemitter3@5.0.1: {}
 
   fast-deep-equal@3.1.3: {}
 
@@ -2760,6 +2785,8 @@ snapshots:
       thenify-all: 1.6.0
 
   nanoid@3.3.7: {}
+
+  nanoid@5.0.7: {}
 
   natural-compare@1.4.0: {}
 

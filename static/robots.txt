@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Allow: /u/$
+Allow: /u/*/*$
+Deny: /*/_sse$

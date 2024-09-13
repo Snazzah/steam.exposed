@@ -1,5 +1,12 @@
 import { MIN_YEAR, getLatestYear } from '$lib/util';
 
+export const PROFILE_STALE_TIME = 86400000; // 1 day
+export const GAME_ACH_STALE_TIME = 86400000 * 7; // 7 days
+export const GAME_ACH_INCOMPLETE_STALE_TIME = 86400000; // 1 day
+export const PLAYER_ACH_INCOMPLETE_STALE_TIME = 3600000; // 1 hour
+export const YEAR_ACH_STALE_TIME = 3600000; // 1 hour
+export const ACH_DATA_STALE_TIME = 3600000; // 1 hour
+
 export function parseYear(request: Request) {
 	const LATEST_YEAR = getLatestYear();
 	let year = LATEST_YEAR;
@@ -14,4 +21,11 @@ export function parseYear(request: Request) {
 	}
 
 	return year;
+}
+
+export function requestIsBot(userAgent: string | null) {
+	return !userAgent ||
+		/bot|chatgpt|facebookexternalhit|WhatsApp|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|MetaInspector/i.test(
+			userAgent
+		);
 }
