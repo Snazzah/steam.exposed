@@ -148,9 +148,11 @@
     {#each Object.keys(calendar) as monthStr}
       {@const month = parseInt(monthStr, 10)}
       {@const monthName = shortMonthDtf.format(new Date(1e3 * (months[month].month + 86400)))}
+      {@const active = selected?.type === 'month' && selected.month === month}
       <button
-        class="absolute text-white font-bold transition-all hover:underline decoration-blue-400"
-        class:text-blue-400={selected?.type === 'month' && selected.month === month}
+        class="absolute font-bold transition-all hover:underline decoration-blue-400"
+        class:text-blue-400={active}
+        class:text-white={!active}
         style:left={`${getMonthColumn(month) * 17}px`}
         on:click={() => selected = { type: 'month', month, date: calendar[month][0], achs: months[month].achievements }}
       >
