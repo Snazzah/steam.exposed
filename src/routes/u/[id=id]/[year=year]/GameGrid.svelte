@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PlaytimeStatsGameSummary, SteamYearInReview } from '$lib/types';
+	import type { AchievementData, PlaytimeStatsGameSummary, SteamYearInReview } from '$lib/types';
 	import { clickOutside } from '$lib/actions';
 	import { writable } from 'svelte/store';
 	import { createEventDispatcher } from 'svelte';
@@ -29,6 +29,17 @@
 
 	export let apps: Record<number, string> = {};
 	export let yearInReview: SteamYearInReview;
+  export let achievements: AchievementData | null;
+
+  const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
+  const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
+  $: sortedAchs = achievements ? Object.keys(achievements.unlocked).reduce((p, k) => {
+    const v = achievements.unlocked[parseInt(k, 10)];
+    return {
+      ...p,
+      [k]: v ? Object.keys(v).filter((achid) => v[achid] !== 0 && v[achid] >= (startDate / 1000) && v[achid] < (stopDate / 1000)).length : 0
+    }
+  }, {} as Record<number, number>) : {};
 	let totalStats = yearInReview.stats.playtime_stats.total_stats;
 	let sortType = 0;
 	const dtf = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' });
@@ -63,11 +74,15 @@
 				return game.rtime_first_played_lifetime
 					? dtf.format(game.rtime_first_played_lifetime * 1000)
 					: '';
+			case 5:
+				return sortedAchs[game.appid]
+          ? `${sortedAchs[game.appid].toLocaleString()} achievement${sortedAchs[game.appid] === 1 ? '' : 's'}`
+					: '';
 		}
 	}
 
 	let showSortDropdown = false;
-	const sortNames = ['Rank', 'Playtime', 'Sessions', 'Release Date', 'First Played'];
+	const sortNames = ['Rank', 'Playtime', 'Sessions', 'Release Date', 'First Played', 'Achievements Earned'];
 	let filterPrompt: HTMLDivElement;
 	let showFilterPopout = false;
 	const defaultFilters: {
@@ -117,6 +132,11 @@
 			case 4: {
 				sortFn = (a, b) =>
 					(b.rtime_first_played_lifetime || 0) - (a.rtime_first_played_lifetime || 0);
+				break;
+			}
+			case 5: {
+				sortFn = (a, b) =>
+					(sortedAchs[b.appid] || 0) - (sortedAchs[a.appid] || 0);
 				break;
 			}
 		}

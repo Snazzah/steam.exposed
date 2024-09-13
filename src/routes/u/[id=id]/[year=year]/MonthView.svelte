@@ -30,9 +30,7 @@
 </script>
 
 <div class="flex flex-col gap-8">
-	<div
-		class="flex gap-2 md:items-center flex-col md:flex-row md:justify-between px-4 py-2 rounded bg-neutral-900"
-	>
+	<div class="flex gap-2 md:items-center flex-col md:flex-row md:justify-between px-4 py-2 rounded bg-neutral-900">
 		<div class="flex gap-2 items-center">
 			<span>Display</span>
 			{#each chartTypes as tab, i}

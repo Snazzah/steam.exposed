@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { SteamYearInReview } from '$lib/types';
-	import { getGameAsset, relativeTime } from '$lib/util';
+	import type { AchievementData, SteamYearInReview } from '$lib/types';
+	import { calcAchievements, getGameAsset, relativeTime } from '$lib/util';
 	import BigStat from '../../../../lib/components/BigStat.svelte';
 	import prettyMilliseconds from 'pretty-ms';
 	import Button from '$lib/components/Button.svelte';
@@ -16,14 +16,30 @@
 	import GameModalMonthChart from './GameModalMonthChart.svelte';
 	import CopyButton from '$lib/components/CopyButton.svelte';
 	import { onMount } from 'svelte';
+	import Achievement from './Achievement.svelte';
+	import GameAchievementDetail from './GameAchievementDetail.svelte';
 
 	export let apps: Record<number, string> = {};
 	export let yearInReview: SteamYearInReview;
+  export let achievements: AchievementData | null = null;
 	let totalStats = yearInReview.stats.playtime_stats.total_stats;
 
 	export let appId: number;
 	let game = yearInReview.stats.playtime_stats.game_summary.find((g) => g.appid === appId)!;
 	let moreInfo = yearInReview.stats.playtime_stats.games.find((g) => g.appid === appId);
+
+  const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
+  const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
+  $: earnedAchievements = achievements?.games[appId]
+    ? achievements.games[appId]
+      ?.map((ach) => ({
+      ...ach,
+      unlocked: achievements.unlocked?.[appId]?.[ach.id] ?? 0
+      }))
+      .filter((ach) => ach.unlocked >= (startDate / 1000) && ach.unlocked < (stopDate / 1000))
+      .sort((a, b) => a.unlocked - b.unlocked)
+      ?? []
+    : []
 
 	const dtf = new Intl.DateTimeFormat(undefined, {
 		weekday: 'long',
@@ -34,6 +50,10 @@
 		minute: 'numeric',
 		second: 'numeric',
 		timeZoneName: 'short'
+	});
+	const achDtf = new Intl.DateTimeFormat(undefined, {
+		dateStyle: 'medium',
+    timeStyle: 'short'
 	});
 	const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'always' });
 
@@ -190,6 +210,23 @@
 		</BigStat>
 	</div>
 	<GameModalMonthChart {appId} {yearInReview} />
+  {#if earnedAchievements.length > 0 && achievements}
+    {@const { achTotal, achEarned, achEarnedBefore, earnedPercent, completed } = calcAchievements(achievements, appId, earnedAchievements)}
+    <div class="flex flex-col gap-4">
+      <h3 class="text-3xl font-extrabold text-white mb-2">Achievements Earned This Year</h3>
+      <div class="flex flex-col">
+        <GameAchievementDetail
+          achAmount={earnedAchievements.length}
+          {achTotal} {achEarned} {achEarnedBefore} {completed} {earnedPercent}
+        />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        {#each earnedAchievements as ach (`modal-${appId}:${ach.id}`)}
+          <Achievement achievement={ach} unlockedAt={ach.unlocked} dtf={achDtf} />
+        {/each}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">

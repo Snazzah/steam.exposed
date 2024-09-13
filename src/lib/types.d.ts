@@ -162,3 +162,23 @@ export interface SteamTag {
 	tagid: number;
 	name: string;
 }
+
+export interface GameAchievement {
+  id: string;
+  name: string;
+  description: string;
+  hidden: boolean;
+  icon: string;
+  iconGray: string;
+  percent: number;
+  removed: boolean;
+}
+
+export interface AchievementData {
+  games: Record<number, GameAchievement[] | null>;
+  unlocked: Record<number, Record<string, number> | null>;
+  complete: boolean;
+  total: number;
+  totalRare: number;
+  gamesWithAchievements: number;
+}

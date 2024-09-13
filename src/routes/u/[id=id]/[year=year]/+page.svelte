@@ -19,16 +19,18 @@
 	import Button from '$lib/components/Button.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import { steamIdToInviteUrl } from '$lib/util';
+	import { loadingIcon, steamIdToInviteUrl } from '$lib/util';
 	import GameModal from './GameModal.svelte';
 	import Portal from 'svelte-portal';
 	import { fade, fly } from 'svelte/transition';
 	import MonthView from './MonthView.svelte';
+	import AchievementsSection from './AchievementsSection.svelte';
+	import type { AchievementData } from '$lib/types';
 
 	export let data: PageData;
 	const available = Object.keys(data.yearInReview).length !== 0;
 
-	let tabs = ['Overview', 'Game List', 'By Month', 'Playtime Streak'];
+	const tabs = ['Overview', 'Game List', 'By Month', 'Playtime Streak', 'Achievements'];
 	let activeTab = 0;
 	let playtimeStats = !available ? null : data.yearInReview.stats.playtime_stats;
 
@@ -58,8 +60,23 @@
 	const copyShareUrlTooltip = tweened(0, { duration: 500, easing: quartIn });
 	let shareAvailable = false;
 
-	onMount(() => {
+  let achievementsLoading = true;
+  let achievements: AchievementData | null = null;
+  let achievementsError: any = null;
+
+	onMount(async () => {
 		shareAvailable = 'share' in navigator && navigator.canShare(shareContent);
+
+    if (data.achievementData) {
+      try {
+        achievements = await data.achievementData;
+      } catch (e) {
+        console.error('Failed to get achievement data', e);
+        achievementsError = e;
+      } finally {
+        achievementsLoading = false;
+      }
+    }
 	});
 </script>
 
@@ -198,12 +215,19 @@
 			{:else}
 				<div class="flex gap-2 whitespace-nowrap w-full flex-wrap md:flex-nowrap justify-center md:justify-start">
 					{#each tabs as tab, i}
+            {@const isAchTab = tab === 'Achievements'}
 						<button
 							class="_tab w-[calc(50%-4px)] md:w-fit"
 							class:--active={activeTab === i}
 							on:click={() => (activeTab = i)}
 						>
-							{tab}
+              {#if isAchTab && achievementsLoading}
+                <Icon
+                  icon={loadingIcon}
+                  class="w-6 h-6 animate-spin flex-none"
+                />
+              {/if}
+							<span>{tab}</span>
 						</button>
 					{/each}
 				</div>
@@ -219,6 +243,7 @@
 					<GameGrid
 						apps={result.apps}
 						yearInReview={data.yearInReview}
+            {achievements}
 						on:select={(e) => (selectedApp = e.detail)}
 					/>
 				{:else if activeTab === 2}
@@ -233,6 +258,29 @@
 						yearInReview={data.yearInReview}
 						on:select={(e) => (selectedApp = e.detail)}
 					/>
+				{:else if activeTab === 4}
+          {#if achievementsLoading}
+            <div class="flex flex-col gap-2 justify-center items-center select-none mt-20">
+              <img src="/images/spinner.png" alt="Loading" class="w-32 h-32" />
+              <span class="text-sm">Loading achievements...</span>
+              <span class="text-xs">This usually takes a while depending on how many games this person unlocked achievements in.</span>
+            </div>
+          {:else if achievementsError}
+            <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
+              <Icon icon={cancelIcon} class="w-16 h-16" />
+              <h3 class="text-2xl font-bold">Failed to load achievements</h3>
+              <span class="text-neutral-400 text-center">
+                A server error occurred while doing this, probably try again later.
+              </span>
+            </div>
+          {:else if achievements}
+            <AchievementsSection
+              apps={result.apps}
+              yearInReview={data.yearInReview}
+              {achievements}
+              on:select={(e) => (selectedApp = e.detail)}
+            />
+          {/if}
 				{/if}
 			{/if}
 
@@ -249,7 +297,7 @@
 							transition:fly={{ duration: 250, y: 32 }}
 							class="w-[1024px] max-h-[calc(100svh-6rem)] relative text-neutral-200 bg-neutral-900 rounded-t md:rounded-b shadow-lg flex-col justify-start items-start inline-flex overflow-hidden"
 						>
-							<GameModal appId={selectedApp} apps={result.apps} yearInReview={data.yearInReview} />
+							<GameModal appId={selectedApp} apps={result.apps} yearInReview={data.yearInReview} {achievements} />
 						</div>
 					</div>
 				</Portal>
@@ -268,7 +316,7 @@
 
 <style lang="scss">
 	._tab {
-		@apply px-4 py-2 rounded-md bg-neutral-700 transition-all self-stretch;
+		@apply px-4 py-2 rounded-md bg-neutral-700 transition-all self-stretch flex justify-center items-center gap-1;
 
 		&:hover {
 			@apply bg-neutral-600;

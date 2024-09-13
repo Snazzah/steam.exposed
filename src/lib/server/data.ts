@@ -1,8 +1,13 @@
-import type { SteamTag, SteamYearInReview } from '$lib/types';
+import type { GameAchievement, SteamTag, SteamYearInReview } from '$lib/types';
 import {
+  fetchAchievementPercentages,
 	fetchAppInfo,
+	fetchGameSchema,
+	fetchPlayerAchievements,
+	fetchPlayerAchievementsXML,
 	fetchProfileItems,
 	fetchSteamSummary,
+	fetchUserYearAchievements,
 	fetchVanity,
 	fetchYearInReview,
 	getAppList,
@@ -11,7 +16,12 @@ import {
 	type SteamProfileItems,
 	type SteamSummary
 } from './api';
+import { logInfo } from './logger';
 import { redis } from './redis';
+import split from 'just-split';
+
+const STEAMDB_WENDY_STEAMID = '76561198074261126';
+const YEAR_ACH_BATCH_AMOUNT = 300;
 
 export async function getAppNames(appids: number[]) {
 	const idsLeft = new Set(appids);
@@ -106,12 +116,12 @@ export async function getTags(lang = 'english'): Promise<SteamTag[]> {
 export async function getUser(
 	steamid: string,
 	loggedInUser = false,
-  skipCache = false
+	skipCache = false
 ): Promise<(SteamSummary & { _fetchedAt: number; }) | 0 | null> {
-  if (!skipCache) {
-    const cached = await redis.get(`user:${steamid}`);
-    if (cached) return JSON.parse(cached);
-  }
+	if (!skipCache) {
+		const cached = await redis.get(`user:${steamid}`);
+		if (cached) return JSON.parse(cached);
+	}
 
 	const summary = await fetchSteamSummary(steamid, loggedInUser);
 	if (summary === undefined) {
@@ -121,7 +131,7 @@ export async function getUser(
 
 	if (!summary) return null;
 
-  const fetchedAt = Date.now();
+	const fetchedAt = Date.now();
 	await redis.set(`user:${steamid}`, JSON.stringify({ ...summary, _fetchedAt: fetchedAt }));
 	return { ...summary, _fetchedAt: fetchedAt };
 }
@@ -158,10 +168,10 @@ export async function getVanityResolution(vanity: string): Promise<string | null
 }
 
 export async function getProfileItems(steamid: string, skipCache = false): Promise<(SteamProfileItems & { _fetchedAt: number; }) | null> {
-  if (!skipCache) {
-    const cached = await redis.get(`profileitems:${steamid}`);
-    if (cached) return JSON.parse(cached);
-  }
+	if (!skipCache) {
+		const cached = await redis.get(`profileitems:${steamid}`);
+		if (cached) return JSON.parse(cached);
+	}
 
 	const items = await fetchProfileItems(steamid);
 	if (!items) {
@@ -169,7 +179,171 @@ export async function getProfileItems(steamid: string, skipCache = false): Promi
 		return null;
 	}
 
-  const fetchedAt = Date.now();
+	const fetchedAt = Date.now();
 	await redis.set(`profileitems:${steamid}`, JSON.stringify({ ...items, _fetchedAt: fetchedAt }));
 	return { ...items, _fetchedAt: fetchedAt };
+}
+
+interface GameAchievements {
+  gameVersion: string;
+  complete: boolean;
+  achievements: GameAchievement[];
+  _fetchedAt: number;
+}
+
+// Uses steamdb_wendy's ID, should work mostly
+export async function getGameAchievements(appid: number, steamid = STEAMDB_WENDY_STEAMID, forceFetch = false): Promise<GameAchievements | null> {
+  const cached = await redis.get(`gameach:${appid}`);
+  if (cached && !forceFetch) return JSON.parse(cached);
+  const cachedGame = cached ? JSON.parse(cached) as (GameAchievements | null) : null;
+
+  const schema = await fetchGameSchema(appid);
+	if (!schema) {
+    const result = cachedGame ? {
+      ...cachedGame,
+      _fetchedAt: Date.now()
+    } : null;
+		await redis.set(`gameach:${appid}`, JSON.stringify(result));
+		return result;
+	}
+
+  // Achievements only need an XML refetch if there are hidden achievements without descriptions
+  const hasAchievements = (schema.game?.availableGameStats?.achievements?.length ?? 0) > 0;
+  const needsXML = hasAchievements && !!schema.game?.availableGameStats?.achievements?.find((a) => a.hidden && !a.description);
+  const percentages = hasAchievements ? await fetchAchievementPercentages(appid) : null;
+
+  // If the user's steam id doesn't work, refetch on wendy
+  const xmlData = needsXML ? ((steamid !== STEAMDB_WENDY_STEAMID ? await fetchPlayerAchievementsXML(steamid, appid) : null) ?? await fetchPlayerAchievementsXML(STEAMDB_WENDY_STEAMID, appid)) : null;
+  const xmlAchievements = xmlData ? Array.isArray(xmlData?.playerstats.achievements.achievement) ? xmlData?.playerstats.achievements.achievement : [xmlData?.playerstats.achievements.achievement] : null;
+
+  const result: GameAchievements = {
+    gameVersion: schema.game?.gameVersion ?? '',
+    complete: needsXML ? !!xmlData : true,
+    achievements: [
+      ...(schema.game?.availableGameStats?.achievements ?? []).map((ach) => ({
+        id: ach.name,
+        name: ach.displayName,
+        description:
+          // Use decription or use refetched XML description
+          ach.description || ((ach.hidden ? xmlAchievements?.find((a) => a.apiname.trim() === ach.name.toLowerCase())?.description.trim() : '') ?? ''),
+        hidden: !!ach.hidden,
+        icon: ach.icon,
+        iconGray: ach.icongray,
+        percent:
+          // Use fetched percentage
+          percentages?.achievementpercentages?.achievements.find((a) => ach.name === a.name)?.percent
+          // Use cached percent
+          ?? cachedGame?.achievements?.find((a) => a.id === ach.name)?.percent
+          // DEfault to -1
+          ?? -1,
+        removed: false
+      })),
+      // Show removed achievements
+      ...(cachedGame?.achievements ?? []).filter((ach) => !schema.game?.availableGameStats?.achievements.find((a) => a.name === ach.id)).map((ach) => ({
+        ...ach,
+        removed: true
+      }))
+    ],
+    _fetchedAt: Date.now()
+  };
+
+	await redis.set(`gameach:${appid}`, JSON.stringify(result));
+  return result;
+}
+
+interface YearAchievements {
+  apps: Record<number, {
+    achievements: string[];
+    allTimeUnlocked: number;
+    futureUnlocks: boolean;
+  }>;
+  total: number;
+  totalRare: number;
+  gamesWithAchievements: number;
+  complete: boolean;
+  _fetchedAt: number;
+}
+
+export async function getUserYearAchievements(steamid: string, year: number, appids: number[], skipCache = false): Promise<YearAchievements> {
+  const REDIS_KEY = `yearach:${steamid}:${year}`;
+  if (!skipCache) {
+    const cached = await redis.get(REDIS_KEY);
+    if (cached) return JSON.parse(cached);
+  }
+
+  const batches = split([ ...new Set(appids) ], YEAR_ACH_BATCH_AMOUNT);
+  const result: YearAchievements = {
+    apps: {},
+    total: 0,
+    totalRare: 0,
+    gamesWithAchievements: 0,
+    complete: true,
+    _fetchedAt: Date.now()
+  };
+
+  for (const batch of batches) {
+    const partResult = await fetchUserYearAchievements(steamid, year, batch);
+    if (!partResult) result.complete = false;
+    else {
+      if (partResult.game_achievements) result.apps = {
+        ...result.apps,
+        ...(partResult.game_achievements.reduce((p, g) => ({
+          ...p,
+          [g.appid]: {
+            achievements: (g.achievements ?? []).map((a) => a.achievement_name_internal),
+            allTimeUnlocked: g.all_time_unlocked_achievements,
+            futureUnlocks: g.unlocked_more_in_future
+          }
+        }), {}))
+      }
+      result.total =+ partResult.total_achievements;
+      result.totalRare =+ partResult.total_rare_achievements;
+      result.gamesWithAchievements =+ partResult.total_games_with_achievements;
+    }
+  }
+
+	await redis.set(REDIS_KEY, JSON.stringify(result));
+  return result;
+}
+
+interface PlayerAchievements {
+  achievements: Record<string, number>;
+  success: boolean;
+  _forYear: number;
+  _fetchedAt: number;
+}
+
+export async function getPlayerAchievements(steamid: string, appid: number, forYear = 0, forceFetch = false): Promise<PlayerAchievements> {
+  const REDIS_KEY = `playerach:${steamid}:${appid}`;
+  const cached = await redis.get(REDIS_KEY);
+  const cachedResult = cached ? JSON.parse(cached) as PlayerAchievements : null;
+  if (cachedResult && !forceFetch && !(cachedResult._forYear !== 0 && forYear && cachedResult._forYear < forYear)) return cachedResult;
+
+  const achievements = await fetchPlayerAchievements(steamid, appid);
+  if (!achievements || !achievements.playerstats?.success) {
+    const result: PlayerAchievements = {
+      achievements: cachedResult?.achievements ?? {},
+      success: false,
+      _forYear: forYear,
+      _fetchedAt: Date.now()
+    };
+    if (achievements?.playerstats?.success === false) logInfo(`Failed to get player achievements [${steamid}/${appid}] ${achievements?.playerstats?.error}`);
+		await redis.set(REDIS_KEY, JSON.stringify(result));
+		return result;
+  }
+
+  const result: PlayerAchievements = {
+    achievements: {
+      ...(cachedResult?.achievements ?? {}),
+      ...achievements.playerstats.achievements.reduce((p, a) => ({
+        ...p,
+        [a.apiname]: a.unlocktime
+      }), {})
+    },
+    success: true,
+    _forYear: forYear,
+    _fetchedAt: Date.now()
+  };
+	await redis.set(REDIS_KEY, JSON.stringify(result));
+  return result;
 }
