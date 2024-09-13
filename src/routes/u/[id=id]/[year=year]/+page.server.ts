@@ -135,6 +135,7 @@ export const load: PageServerLoad = async ({ params, request }) => {
 		/bot|chatgpt|facebookexternalhit|WhatsApp|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|MetaInspector/i.test(
 			userAgent
 		);
+  const unavailable = Object.keys(yearInReview).length === 0;
 
 	return {
 		profile,
@@ -142,6 +143,6 @@ export const load: PageServerLoad = async ({ params, request }) => {
 		year: params.year,
 		yearInReview,
 		data: isBot ? null : getData(yearInReview),
-		achievementData: isBot ? null : getAchievements(params.id, parseInt(params.year), yearInReview)
+		achievementData: (isBot || unavailable) ? null : getAchievements(params.id, parseInt(params.year), yearInReview)
 	};
 };
