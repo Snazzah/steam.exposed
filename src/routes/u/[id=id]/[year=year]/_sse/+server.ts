@@ -3,8 +3,10 @@ import { achQ, runningAchJob } from '$lib/server/queue';
 import { SSEConnection, SSEResponse } from '$lib/server/sse/client';
 import { sseManager } from '$lib/server/sse/manager';
 import { requestIsBot } from '$lib/server/util';
+import throttle from 'just-throttle';
 
 import type { RequestHandler } from './$types';
+import type { AnyMessageEvent } from '$lib/sse/types';
 
 export const GET: RequestHandler = async ({ request, params }) => {
 	const userAgent = request.headers.get('User-Agent');
@@ -32,20 +34,27 @@ export const GET: RequestHandler = async ({ request, params }) => {
   const achievementData = await getCachedAchievementData(params.id, year)
   if (achievementData) return new SSEResponse([{ event: 'init', data: { streaming: false, data: achievementData } }, { event: 'end', data: {} }]);
 
-
   const jobId = `${params.id}-${params.year}`;
 
   const task = achQ.getQueue().find((t) => t.steamid === params.id && t.year === year);
   if (!task && runningAchJob !== jobId) {
+    const throttledSend = throttle((msg: AnyMessageEvent) => {
+      const group = sseManager.jobGroups.get(jobId);
+      if (group) group.send(msg);
+    }, 500, { trailing: true });
     achQ.push({
       steamid: params.id,
       year,
       yearInReview,
       send(msg) {
+        if (msg.event === 'update') return throttledSend(msg);
         const group = sseManager.jobGroups.get(jobId);
         if (group) {
           group.send(msg);
-          if (msg.event === 'end') group.destroy();
+          if (msg.event === 'end') {
+            group.destroy();
+            throttledSend.cancel();
+          }
         }
       }
     })

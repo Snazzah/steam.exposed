@@ -70,6 +70,11 @@ export let runningAchJob = '';
 async function achWorker(task: AchievementTask, cb: done) {
   runningAchJob = `${task.steamid}-${task.year}`;
   logQueue(`Starting achievement task for ${task.steamid} on ${task.year}`);
+  // for (let i = 0; i < 600; i++) {
+  //   await new Promise((r) => setTimeout(r, 100));
+  //   task.send({ event: 'update', data: { text: 'Progress...', progress: i / 600 } });
+  // }
+
   try {
     const { steamid: id, year, yearInReview } = task;
     const appids = yearInReview.stats.playtime_stats.game_summary.map((a) => a.appid);
