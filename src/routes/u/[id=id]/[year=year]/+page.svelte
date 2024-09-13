@@ -190,15 +190,13 @@
 				<div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
 					<Icon icon={cancelIcon} class="w-16 h-16" />
 					<h3 class="text-2xl font-bold">Data Unavailable</h3>
-					<span class="text-neutral-400 text-center"
-						>The data for {data.year}'s year in review wound up empty. The account must set their
-						Year in Review's <b>Page Visibility</b> to <b>Public</b>.</span
-					>
+					<span class="text-neutral-400 text-center">
+            The data for {data.year}'s year in review wound up empty. The account must set their
+						Year in Review's <b>Page Visibility</b> to <b>Public</b>.
+          </span>
 				</div>
 			{:else}
-				<div
-					class="flex gap-2 whitespace-nowrap w-full flex-wrap md:flex-nowrap justify-center md:justify-start"
-				>
+				<div class="flex gap-2 whitespace-nowrap w-full flex-wrap md:flex-nowrap justify-center md:justify-start">
 					{#each tabs as tab, i}
 						<button
 							class="_tab w-[calc(50%-4px)] md:w-fit"

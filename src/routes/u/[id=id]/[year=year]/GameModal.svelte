@@ -97,9 +97,9 @@
 				{#if game.rtime_release_date}
 					<dd>
 						{dtf.format(game.rtime_release_date * 1000)}
-						<span class="text-neutral-400"
-							>({relativeTime(rtf, game.rtime_release_date - Date.now() / 1000)})</span
-						>
+						<span class="text-neutral-400">
+              ({relativeTime(rtf, game.rtime_release_date - Date.now() / 1000)})
+            </span>
 					</dd>
 				{:else}
 					<dd class="italic text-neutral-500">Unknown</dd>

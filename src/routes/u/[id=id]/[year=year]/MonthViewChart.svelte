@@ -20,7 +20,6 @@
 		'bg-gray-600 group-hover:bg-gray-500'
 	];
 	const { topPercentage, ySteps } = calculateBarGraph(data, 4, 5);
-	$: console.log({ topPercentage, ySteps });
 
 	const longDtf = new Intl.DateTimeFormat(undefined, { month: 'long' });
 	const shortDtf = new Intl.DateTimeFormat(undefined, { month: 'short' });
@@ -34,9 +33,9 @@
 	<div class="flex flex-col justify-between pb-5 pr-1 items-end tracking-[-0.1em]">
 		{#each ySteps as step}
 			<div class="w-5">
-				<span class="absolute -mt-4"
-					>{useInt ? Math.round(step / 100) : `${Math.round(step)}%`}</span
-				>
+				<span class="absolute -mt-4">
+          {useInt ? Math.round(step / 100) : `${Math.round(step)}%`}
+        </span>
 				<hr class="border-t border-neutral-500 border-dashed h-[1px] w-full absolute" />
 			</div>
 		{/each}

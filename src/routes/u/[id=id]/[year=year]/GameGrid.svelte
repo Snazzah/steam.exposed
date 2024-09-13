@@ -296,12 +296,14 @@
 						/>
 					</div>
 					<div class="flex items-center justify-between">
-						<span
-							>Unknown Apps <span
+						<span>
+              Unknown Apps
+              <span
 								class="text-sm opacity-50"
-								title="Apps that could not be fetched information from.">(?)</span
-							></span
-						>
+								title="Apps that could not be fetched information from.">
+                (?)
+              </span>
+            </span>
 						<ThreeWaySwitch
 							value={$filters.unknown}
 							on:update={(value) => filters.update((f) => ({ ...f, unknown: value.detail }))}
