@@ -73,7 +73,7 @@
   });
 
   function getMonthColumn(month: number) {
-    return days.indexOf(calendar[month].find((d) => d.getDay() === 0)!) / 7;
+    return (Math.round(days.indexOf(calendar[month].find((d) => d.getDay() === 0)!)) + calendar[0][0].getDay()) / 7;
   }
 
   let hoveredDay = {
