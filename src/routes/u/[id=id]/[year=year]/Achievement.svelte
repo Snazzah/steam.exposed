@@ -12,6 +12,7 @@
   export let gameName: string = '';
   export let unlockedAt = 0;
   export let dtf: Intl.DateTimeFormat;
+  export let dayDtf: Intl.DateTimeFormat;
 
 	const showTooltip = tweened(0);
 	const [floatingRef, floatingContent] = createFloatingActions({
@@ -30,8 +31,8 @@
 <button
   class="w-12 h-12 bg-neutral-800 border transition-all hover:scale-125 group active:scale-95"
   class:_glow={achievement.percent !== -1 && achievement.percent < 10}
-  class:border-red-600={achievement.removed}
-  class:border-transparent={!achievement.removed}
+  class:border-red-600={!!achievement.removedAt}
+  class:border-transparent={!achievement.removedAt}
 	use:floatingRef
 	on:mouseenter={() => showTooltip.set(1, { duration: 100 })}
 	on:mouseleave={() => showTooltip.set(0, { duration: 0 })}
@@ -66,7 +67,7 @@
           <p class="text-sm leading-4 mt-1 text-neutral-300">{achievement.description}</p>
         {/if}
       </div>
-      {#if achievement.percent !== -1 || unlockedAt || achievement.removed}
+      {#if achievement.percent !== -1 || unlockedAt || achievement.removedAt}
         <div class="text-xs sm:text-sm mt-2 text-neutral-400 flex flex-col">
           {#if unlockedAt}
             <span>Unlocked on {dtf.format(unlockedAt * 1000)}</span>
@@ -74,8 +75,8 @@
           {#if achievement.percent !== -1}
             <span class:text-amber-300={achievement.percent < 10}>{achievement.percent.toFixed(1)}% of players earned this achievement</span>
           {/if}
-          {#if achievement.removed}
-            <span class="text-red-400">This achievement was removed</span>
+          {#if achievement.removedAt}
+            <span class="text-red-400">This achievement was removed some time before {dayDtf.format(achievement.removedAt)}</span>
           {/if}
         </div>
       {/if}

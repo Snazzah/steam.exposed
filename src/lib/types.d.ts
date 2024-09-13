@@ -171,7 +171,8 @@ export interface GameAchievement {
   icon: string;
   iconGray: string;
   percent: number;
-  removed: boolean;
+  foundAt: number;
+  removedAt: number | null;
 }
 
 export interface AchievementData {

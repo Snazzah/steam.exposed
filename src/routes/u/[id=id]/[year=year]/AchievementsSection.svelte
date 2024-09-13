@@ -229,7 +229,7 @@
                 {achievement}
                 gameName={apps[ach.appid]}
                 unlockedAt={achievements.unlocked[ach.appid]?.[ach.id] ?? 0}
-                {dtf}
+                {dtf} {dayDtf}
                 on:click={() => dispatch('select', ach.appid)}
               />
             {/if}
@@ -272,7 +272,7 @@
                       {achievement}
                       gameName={apps[ach.appid]}
                       unlockedAt={achievements.unlocked[ach.appid]?.[ach.id] ?? 0}
-                      {dtf}
+                      {dtf} {dayDtf}
                       on:click={() => dispatch('select', ach.appid)}
                     />
                   {/if}

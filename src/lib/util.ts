@@ -256,11 +256,11 @@ export function showLowestFixed(n: number) {
 
 // These elaborate checks are to filter out removed achievements from counts
 export function calcAchievements(achievements: AchievementData, appid: number, earnedAchs: { id: string; unlocked: number }[]) {
-  const achTotal = achievements.games[appid]?.filter((ach) => !ach.removed)?.length ?? 0;
-  const achEarned = earnedAchs.filter((ach) => !!achievements.games[appid]?.find((a) => a.id === ach.id && !a.removed)).length;
+  const achTotal = achievements.games[appid]?.filter((ach) => !ach.removedAt)?.length ?? 0;
+  const achEarned = earnedAchs.filter((ach) => !!achievements.games[appid]?.find((a) => a.id === ach.id && !a.removedAt)).length;
   const achEarnedBefore = Object.keys(achievements.unlocked[appid] ?? {}).filter((achid) => {
     const unlocked = achievements.unlocked[appid]?.[achid] ?? 0;
-    const notRemoved = !!achievements.games[appid]?.find((a) => a.id === achid && !a.removed);
+    const notRemoved = !!achievements.games[appid]?.find((a) => a.id === achid && !a.removedAt);
     return unlocked !== 0 && achievements.games[appid] && notRemoved && earnedAchs[0].unlocked > unlocked;
   }).length;
   const earnedPercent = achTotal > 0 ? ((achEarned / achTotal) * 100) : 0;

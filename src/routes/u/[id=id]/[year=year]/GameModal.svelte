@@ -55,6 +55,9 @@
 		dateStyle: 'medium',
     timeStyle: 'short'
 	});
+  const dayDtf = new Intl.DateTimeFormat(undefined, {
+		dateStyle: 'long'
+  });
 	const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'always' });
 
 	let heroUrl = '';
@@ -222,7 +225,7 @@
       </div>
       <div class="flex gap-2 flex-wrap">
         {#each earnedAchievements as ach (`modal-${appId}:${ach.id}`)}
-          <Achievement achievement={ach} unlockedAt={ach.unlocked} dtf={achDtf} />
+          <Achievement achievement={ach} unlockedAt={ach.unlocked} dtf={achDtf} {dayDtf} />
         {/each}
       </div>
     </div>

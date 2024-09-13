@@ -252,14 +252,15 @@ export async function getGameAchievements(appid: number, steamid = STEAMDB_WENDY
           percentages?.achievementpercentages?.achievements.find((a) => ach.name === a.name)?.percent
           // Use cached percent
           ?? cachedGame?.achievements?.find((a) => a.id === ach.name)?.percent
-          // DEfault to -1
+          // Default to -1
           ?? -1,
-        removed: false
+        foundAt: cachedGame?.achievements?.find((a) => a.id === ach.name)?.foundAt ?? Date.now(),
+        removedAt: null
       })),
       // Show removed achievements
       ...(cachedGame?.achievements ?? []).filter((ach) => !schema.game?.availableGameStats?.achievements.find((a) => a.name === ach.id)).map((ach) => ({
         ...ach,
-        removed: true
+        removedAt: cachedGame?.achievements?.find((a) => a.id === ach.name)?.removedAt ?? Date.now()
       }))
     ],
     _fetchedAt: Date.now()
