@@ -302,7 +302,7 @@ export async function getUserYearAchievements(steamid: string, year: number, app
 
   for (const batch of batches) {
     const partResult = await fetchUserYearAchievements(steamid, year, batch);
-    if (!partResult) result.complete = false;
+    if (!partResult || Object.keys(partResult).length === 0) result.complete = false;
     else {
       if (partResult.game_achievements) result.apps = {
         ...result.apps,
@@ -315,9 +315,12 @@ export async function getUserYearAchievements(steamid: string, year: number, app
           }
         }), {}))
       }
-      result.total =+ partResult.total_achievements;
-      result.totalRare =+ partResult.total_rare_achievements;
-      result.gamesWithAchievements =+ partResult.total_games_with_achievements;
+      if (typeof partResult.total_achievements === 'number')
+        result.total =+ partResult.total_achievements;
+      if (typeof partResult.total_rare_achievements === 'number')
+        result.totalRare =+ partResult.total_rare_achievements;
+      if (typeof partResult.total_games_with_achievements === 'number')
+        result.gamesWithAchievements =+ partResult.total_games_with_achievements;
     }
   }
 
