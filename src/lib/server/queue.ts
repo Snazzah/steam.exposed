@@ -152,6 +152,7 @@ async function achWorker(task: AchievementTask, cb: done) {
       }
     });
   } catch (e) {
+    logQueue(`Failed to load achievements for ${task.steamid} on ${task.year}`, e);
     task.send({
       event: 'end',
       data: {

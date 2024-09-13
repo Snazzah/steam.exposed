@@ -243,7 +243,7 @@ export async function getGameAchievements(appid: number, steamid = STEAMDB_WENDY
         name: ach.displayName,
         description:
           // Use decription or use refetched XML description
-          ach.description || ((ach.hidden ? xmlAchievements?.find((a) => a.apiname.trim() === ach.name.toLowerCase())?.description.trim() : '') ?? ''),
+          ach.description || ((ach.hidden ? xmlAchievements?.find((a) => String(a.apiname).trim() === ach.name.toLowerCase())?.description.trim() : '') ?? ''),
         hidden: !!ach.hidden,
         icon: ach.icon,
         iconGray: ach.icongray,
