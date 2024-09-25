@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AchievementData, SteamYearInReview } from '$lib/types';
+	import type { AchievementData, AppInfo, SteamYearInReview } from '$lib/types';
 	import { calcAchievements, getGameAsset, relativeTime } from '$lib/util';
 	import BigStat from '../../../../lib/components/BigStat.svelte';
 	import prettyMilliseconds from 'pretty-ms';
@@ -19,7 +19,7 @@
 	import Achievement from './Achievement.svelte';
 	import GameAchievementDetail from './GameAchievementDetail.svelte';
 
-	export let apps: Record<number, string> = {};
+	export let apps: Record<number, AppInfo> = {};
 	export let yearInReview: SteamYearInReview;
   export let achievements: AchievementData | null = null;
 	let totalStats = yearInReview.stats.playtime_stats.total_stats;
@@ -27,6 +27,8 @@
 	export let appId: number;
 	let game = yearInReview.stats.playtime_stats.game_summary.find((g) => g.appid === appId)!;
 	let moreInfo = yearInReview.stats.playtime_stats.games.find((g) => g.appid === appId);
+  let appInfo = apps[appId];
+  let appName = appInfo?.name || `App ${appId}`;
 
   const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
   const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
@@ -66,13 +68,20 @@
 		if (asset) heroUrl = asset;
 	};
 
+	let logoUrl = '';
+	const loadLogo = async () => {
+    if (!appInfo.logoPosition) return;
+		const asset = await getGameAsset(game.appid, ['logo']);
+		if (asset) logoUrl = asset;
+	};
+
 	// TODO show playtime streak & ranks
 
-	onMount(() => loadHero());
+	onMount(() => Promise.all([loadHero(), loadLogo()]));
 </script>
 
 <div
-	class="bg-cover bg-no-repeat bg-center h-36 md:h-56 w-full flex flex-col items-start justify-between bg-slate-600/25"
+	class="bg-cover bg-no-repeat bg-center h-72 w-full flex flex-col items-start justify-between bg-slate-600/25 relative"
 	style:background-image={heroUrl ? `url(${heroUrl})` : undefined}
 >
 	<div class="flex w-full items-center justify-end gap-2 p-2 mb-10">
@@ -83,9 +92,9 @@
 			<span class="text-xs md:text-sm px-2 bg-zinc-500 text-white rounded _badge">PLAYTEST</span>
 		{/if}
 		{#if game.new_this_year}
-			<span class="text-xs md:text-sm px-2 bg-purple-500 text-white rounded _badge"
-				>NEW THIS YEAR</span
-			>
+			<span class="text-xs md:text-sm px-2 bg-purple-500 text-white rounded _badge">
+        NEW THIS YEAR
+      </span>
 		{/if}
 		{#if !apps[appId]}
 			<span
@@ -96,13 +105,27 @@
 			</span>
 		{/if}
 	</div>
-	<div
-		class="flex flex-col w-full items-start justify-center px-4 py-2 backdrop-blur-sm overflow-ellipsis bg-black/25"
-	>
-		<h3 class="_gameheadername font-bold md:text-4xl text-ellipsis">
-			{apps[appId] || `App ${appId}`}
-		</h3>
-	</div>
+
+  {#if logoUrl && appInfo?.logoPosition}
+    <div
+      class="w-full h-full flex absolute p-2"
+      class:items-start={appInfo.logoPosition.position.startsWith('Top')}
+      class:items-center={appInfo.logoPosition.position.startsWith('Center')}
+      class:items-end={appInfo.logoPosition.position.startsWith('Bottom')}
+      class:justify-start={appInfo.logoPosition.position.endsWith('Left')}
+      class:justify-center={appInfo.logoPosition.position.endsWith('Center')}
+    >
+      <img style:height={`${appInfo.logoPosition.height}%`} src={logoUrl} alt={appName} title={appName} />
+    </div>
+  {:else}
+    <div
+      class="flex flex-col w-full items-start justify-center px-4 py-2 backdrop-blur-sm overflow-ellipsis bg-black/25"
+    >
+      <h3 class="_gameheadername font-bold md:text-4xl text-ellipsis">
+        {appName}
+      </h3>
+    </div>
+  {/if}
 </div>
 
 <div class="flex flex-col p-4 gap-8 w-full overflow-y-auto light-scrollbar">

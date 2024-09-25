@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SteamYearInReview } from '$lib/types';
+	import type { AppInfo, SteamYearInReview } from '$lib/types';
 	import { page } from '$app/stores';
 	import html2canvas from '@wtto00/html2canvas';
 	import { loadingIcon, steamIdToInviteUrl } from '$lib/util';
@@ -14,7 +14,7 @@
 	import MonthViewChart from './MonthViewChart.svelte';
 	import { tweened } from 'svelte/motion';
 
-	export let apps: Record<number, string> = {};
+	export let apps: Record<number, AppInfo> = {};
 	export let yearInReview: SteamYearInReview;
 	const data = yearInReview.stats.playtime_stats.months.map((m) => ({
 		month: m.rtime_month,

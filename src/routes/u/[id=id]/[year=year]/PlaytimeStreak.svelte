@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { SteamYearInReview } from '$lib/types';
+	import type { AppInfo, SteamYearInReview } from '$lib/types';
 	import BigStat from '$lib/components/BigStat.svelte';
 	import GameGridChild from './GameGridChild.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher<{ select: number }>();
 
-	export let apps: Record<number, string> = {};
+	export let apps: Record<number, AppInfo> = {};
 	export let yearInReview: SteamYearInReview;
 	const playtimeStreak = yearInReview.stats.playtime_stats.playtime_streak;
 	const gameAmount = playtimeStreak.streak_games.length;
@@ -49,7 +49,7 @@
 			)}
 			{#if game}
 				<GameGridChild
-					name={apps[streakGame.appid]}
+					info={apps[streakGame.appid]}
 					on:click={() => dispatch('select', streakGame.appid)}
 					{game}
 				/>

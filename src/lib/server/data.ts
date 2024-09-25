@@ -19,6 +19,8 @@ import {
 import { logInfo } from './logger';
 import { redis } from './redis';
 import split from 'just-split';
+import { user } from './steam';
+import { UNKNOWN_APPID_TIME } from './util';
 
 const STEAMDB_WENDY_STEAMID = '76561198074261126';
 const YEAR_ACH_BATCH_AMOUNT = 300;
@@ -83,21 +85,44 @@ export async function getAppInfo(appids: number[]) {
 		}
 	}
 
-	for (const id of idsLeft.values()) {
-		const appinfo = await fetchAppInfo(id);
-		if (!appinfo) break;
+  if (user.steamID) {
+    if (idsLeft.size !== 0) {
+      const response = await user.getProductInfo([...idsLeft], []);
 
-		if (appinfo.success) {
-			results[id] = appinfo.data;
-			await redis.set(`appinfo:${id}`, JSON.stringify(appinfo.data));
-			await redis.set(`appname:${id}`, appinfo.data.name);
-			if (appinfo.data.fullgame?.appid)
-				await redis.set(`appname:${appinfo.data.fullgame.appid}`, appinfo.data.fullgame.name);
-		} else {
-			results[id] = { miss: true };
-			await redis.set(`appinfo:${id}`, '{"miss":true}', 'EX', 3600);
-		}
-	}
+      for (const [id, app] of Object.entries(response.apps)) {
+        results[app.appinfo.appid] = {
+          name: app.appinfo.common.name,
+          _steamData: {
+            ...app.appinfo,
+            missingToken: app.missingToken
+          }
+        };
+        await redis.set(`appinfo:${id}`, JSON.stringify(results[app.appinfo.appid]));
+        await redis.set(`appname:${id}`, app.appinfo.common.name);
+      }
+
+      for (const id of response.unknownApps) {
+        results[id] = { miss: true };
+        await redis.set(`appinfo:${id}`, '{"miss":true}', 'EX', UNKNOWN_APPID_TIME / 1000);
+      }
+    }
+  } else {
+    for (const id of idsLeft.values()) {
+      const appinfo = await fetchAppInfo(id);
+      if (!appinfo) break;
+
+      if (appinfo.success) {
+        results[id] = appinfo.data;
+        await redis.set(`appinfo:${id}`, JSON.stringify(appinfo.data));
+        await redis.set(`appname:${id}`, appinfo.data.name);
+        if (appinfo.data.fullgame?.appid)
+          await redis.set(`appname:${appinfo.data.fullgame.appid}`, appinfo.data.fullgame.name);
+      } else {
+        results[id] = { miss: true };
+        await redis.set(`appinfo:${id}`, '{"miss":true}', 'EX', 3600);
+      }
+    }
+  }
 
 	return results;
 }

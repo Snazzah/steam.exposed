@@ -161,6 +161,7 @@ interface AssetCacheGame {
 	portrait: AssetCacheItem | null;
 	libraryCover: AssetCacheItem | null;
 	libraryHero: AssetCacheItem | null;
+	logo: AssetCacheItem | null;
 }
 
 const gameAssetCache: Record<string, AssetCacheGame> = {};
@@ -170,13 +171,14 @@ export async function getGameAsset(appId: number, assetList: (keyof AssetCacheGa
 	if (!browser) throw new Error('Tried to use getGameAsset in server');
 	const game =
 		gameAssetCache[String(appId)] ||
-		(gameAssetCache[String(appId)] = { portrait: null, libraryCover: null, libraryHero: null });
+		(gameAssetCache[String(appId)] = { portrait: null, libraryCover: null, libraryHero: null, logo: null });
 	const now = Date.now();
 
 	const assetUrls: Record<string, string> = {
 		portrait: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/portrait.png`,
 		libraryCover: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_600x900.jpg`,
-		libraryHero: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_hero.jpg`
+		libraryHero: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_hero.jpg`,
+		logo: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/logo.png`
 	};
 
 	let selectedType: string | null = null;

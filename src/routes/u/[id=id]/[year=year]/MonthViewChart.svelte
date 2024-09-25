@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { SteamYearInReview } from '$lib/types';
+	import type { AppInfo, SteamYearInReview } from '$lib/types';
 	import { calculateBarGraph, getGameAsset } from '$lib/util';
 	import { createEventDispatcher } from 'svelte';
 
-	export let apps: Record<number, string> = {};
+	export let apps: Record<number, AppInfo> = {};
 	export let yearInReview: SteamYearInReview;
 	export let data: {
 		month: number;
@@ -79,7 +79,7 @@
 											<img
 												class="w-full h-full object-cover group-hover:brightness-110"
 												src={asset}
-												alt={apps[game.appid] || `App ${game.appid}`}
+												alt={apps[game.appid]?.name || `App ${game.appid}`}
 											/>
 										{/if}
 									{/await}

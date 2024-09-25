@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AchievementData, SteamYearInReview } from '$lib/types';
+	import type { AchievementData, AppInfo, SteamYearInReview } from '$lib/types';
 	import BigStat from '$lib/components/BigStat.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import Achievement from './Achievement.svelte';
@@ -15,7 +15,7 @@
 
 	const dispatch = createEventDispatcher<{ select: number }>();
 
-	export let apps: Record<number, string> = {};
+	export let apps: Record<number, AppInfo> = {};
 	export let yearInReview: SteamYearInReview;
   export let achievements: AchievementData;
 
@@ -229,7 +229,7 @@
             {#if achievement}
               <Achievement
                 {achievement}
-                gameName={apps[ach.appid]}
+                gameName={apps[ach.appid]?.name}
                 unlockedAt={achievements.unlocked[ach.appid]?.[ach.id] ?? 0}
                 {dtf} {dayDtf}
                 on:click={() => dispatch('select', ach.appid)}
@@ -251,14 +251,14 @@
                 <img
                   class="rounded w-full h-full object-cover"
                   src={`https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_231x87.jpg`}
-                  alt={apps[appid]}
+                  alt={apps[appid]?.name || `App ${appid}`}
                 />
                 {#if completed}
                   <Icon icon={perfectGameIcon} class="absolute -bottom-5 -left-5 w-10 h-10 pointer-events-none" />
                 {/if}
               </button>
               <div class="flex flex-col flex-1 w-full">
-                <h5 class="text-white text-xl font-bold">{apps[appid]}</h5>
+                <h5 class="text-white text-xl font-bold">{apps[appid]?.name || `App ${appid}`}</h5>
                 <GameAchievementDetail
                   achAmount={selectedGames[appid].length}
                   {achTotal} {achEarned} {achEarnedBefore} {completed} {earnedPercent}
@@ -272,7 +272,7 @@
                   {#if achievement}
                     <Achievement
                       {achievement}
-                      gameName={apps[ach.appid]}
+                      gameName={apps[ach.appid]?.name}
                       unlockedAt={achievements.unlocked[ach.appid]?.[ach.id] ?? 0}
                       {dtf} {dayDtf}
                       on:click={() => dispatch('select', ach.appid)}

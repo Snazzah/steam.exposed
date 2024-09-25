@@ -1,4 +1,5 @@
 import { logInfo } from '$lib/server/logger';
+import { user } from '$lib/server/steam';
 import type { HandleServerError } from '@sveltejs/kit';
 
 export const handleError: HandleServerError = async ({ error, status }) => {
@@ -11,8 +12,7 @@ export const handleError: HandleServerError = async ({ error, status }) => {
 
 process.on('sveltekit:shutdown', async (signal: NodeJS.Signals) => {
   logInfo(`Received signal: ${signal}. Gracefully shutting down...`);
-  // anything you need to clean up manually goes in here
-  // await sleep(5000);
-  // await jobs.stop();
-  // await db.close();
+  user.logOff();
 });
+
+if (!user.steamID) user.logOn({ anonymous: true });

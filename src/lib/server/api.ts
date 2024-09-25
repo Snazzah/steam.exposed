@@ -42,15 +42,32 @@ export interface SteamApp {
 }
 
 export interface SteamAppInfo {
-	type: 'app' | 'demo' | 'mod';
+	type?: 'app' | 'demo' | 'mod';
 	name: string;
-	steam_appid: number;
-	required_age: number;
-	is_free: boolean;
 	fullgame?: {
 		appid: string;
 		name: string;
 	};
+  _steamData?: {
+    missingToken: boolean;
+    appid: string;
+    common: {
+      name: string;
+      type: 'Game' | 'Demo';
+      icon: string;
+      library_assets: {
+        library_capsule: string;
+        library_hero: string;
+        library_logo: string;
+        logo_position: {
+          pinned_position: 'BottomLeft' | 'BottomCenter' | 'TopCenter' | 'CenterCenter';
+          width_pct: string;
+          height_pct: string;
+        }
+      },
+    };
+    extended: any;
+  }
 }
 
 export interface SteamProfileItem {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AchievementData, PlaytimeStatsGameSummary, SteamYearInReview } from '$lib/types';
+	import type { AchievementData, AppInfo, PlaytimeStatsGameSummary, SteamYearInReview } from '$lib/types';
 	import { clickOutside } from '$lib/actions';
 	import { writable } from 'svelte/store';
 	import { createEventDispatcher } from 'svelte';
@@ -27,7 +27,7 @@
 		rank: number;
 	}
 
-	export let apps: Record<number, string> = {};
+	export let apps: Record<number, AppInfo> = {};
 	export let yearInReview: SteamYearInReview;
   export let achievements: AchievementData | null;
 
@@ -345,7 +345,7 @@
 	{#each games as game (game.appid)}
 		{@const sortInfo = gameSortInfo[game.appid]}
 		<GameGridChild
-			name={apps[game.appid]}
+			info={apps[game.appid]}
 			{game}
 			on:click={() => dispatch('select', game.appid)}
 			footer={formatSortInfo(game, sortInfo)}

@@ -183,3 +183,13 @@ export interface AchievementData {
   totalRare: number;
   gamesWithAchievements: number;
 }
+
+export interface AppInfo {
+  name: string;
+  icon?: string;
+  logoPosition?: {
+    position: "BottomLeft" | "BottomCenter" | "TopCenter" | "CenterCenter";
+    width: number;
+    height: number;
+  }
+}

@@ -3,12 +3,12 @@
 	import { autoPlacement, offset, shift } from 'svelte-floating-ui/dom';
 	import { createFloatingActions } from 'svelte-floating-ui';
 	import Portal from 'svelte-portal';
-	import type { PlaytimeStatsGameSummary } from '$lib/types';
+	import type { AppInfo, PlaytimeStatsGameSummary } from '$lib/types';
 	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
 	import { getGameAsset } from '$lib/util';
 
-	export let name: string | undefined = undefined;
+	export let info: AppInfo | undefined = undefined;
 	export let game: PlaytimeStatsGameSummary;
 	export let footer = '';
 
@@ -18,6 +18,7 @@
 		const asset = await getGameAsset(game.appid, ['libraryCover', 'portrait']);
 		if (asset) coverUrl = asset;
 	};
+  let appName = info?.name || `App ${game.appid}`;
 
 	onMount(() => {
 		const intersectionObserverSupport =
@@ -67,14 +68,14 @@
 			transition:fade
 			class="absolute w-full h-full top-0 text-center bg-neutral-900"
 			src={coverUrl}
-			alt={name || `App ${game.appid}`}
+			alt={appName}
 		/>
 	{:else}
 		<span
 			transition:fade
 			class="absolute w-full h-full top-0 left-0 text-center align-middle overflow-hidden py-8 px-2 text-sm md:text-xl select-none _appname"
 		>
-			{name || `App ${game.appid}`}
+			{appName}
 		</span>
 	{/if}
 	{#if footer}
@@ -83,12 +84,12 @@
 			>
 		</div>
 	{/if}
-	{#if game.demo || !name}
+	{#if game.demo || !info}
 		<div class="absolute text-xs md:text-sm top-1 right-1 flex gap-1">
 			{#if game.demo}
 				<span class="px-2 bg-green-400 text-black rounded _demo">DEMO</span>
 			{/if}
-			{#if !name}
+			{#if !info}
 				<span
 					class="px-2 bg-neutral-700 text-white rounded _demo"
 					title="Failed to fetch more information about this app. Assets may still load."
@@ -107,7 +108,7 @@
 			transition:scale={{ duration: 250, start: 0.9 }}
 			use:floatingContent
 		>
-			{name || `App ${game.appid}`}
+			{appName}
 		</div>
 	</Portal>
 {/if}

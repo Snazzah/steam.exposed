@@ -9,7 +9,7 @@ import {
 	getUser,
 	getYearInReview,
 } from '$lib/server/data';
-import type { SteamYearInReview } from '$lib/types';
+import type { AppInfo, SteamYearInReview } from '$lib/types';
 import { q } from '$lib/server/queue';
 import { PROFILE_STALE_TIME, requestIsBot } from '$lib/server/util';
 
@@ -17,7 +17,7 @@ async function getData(yearInReview: SteamYearInReview) {
 	const available = Object.keys(yearInReview).length !== 0;
 
 	let tags: { tagid: number; name: string }[] = [];
-	let apps: Record<number, string> = {};
+	let apps: Record<number, AppInfo> = {};
 	if (available) {
 		const taglist = await getTags();
 		if (taglist)
@@ -27,17 +27,24 @@ async function getData(yearInReview: SteamYearInReview) {
 			);
 
 		const appIds = yearInReview.stats.playtime_stats.game_summary.map((g) => g.appid);
-		apps = await getAppNames(appIds);
+		apps = await getAppNames(appIds).then((r => Object.values(r).reduce((p, [k, v]) => ({ ...p, [k]: { name: v} }), {})));
+
 		const appInfos = await getAppInfo(
-			yearInReview.stats.playtime_stats.game_summary
-				.filter((g) => apps[g.appid] === '' || !apps[g.appid])
-				.map((g) => g.appid)
+			yearInReview.stats.playtime_stats.game_summary.map((g) => g.appid)
 		);
 		for (const appId in appInfos) {
 			const app = appInfos[appId];
 			if (!('miss' in app)) {
-				apps[Number(appId)] = app.name;
-				if (app.fullgame?.appid) apps[Number(app.fullgame.appid)] = app.fullgame.name;
+				apps[Number(appId)] = {
+          name: app.name,
+          icon: app._steamData?.common.icon,
+          logoPosition: app._steamData?.common.library_assets?.logo_position ? {
+            position: app._steamData.common.library_assets.logo_position.pinned_position,
+            width: parseFloat(app._steamData.common.library_assets.logo_position.width_pct),
+            height: parseFloat(app._steamData.common.library_assets.logo_position.height_pct)
+          } : undefined
+        };
+				if (app.fullgame?.appid) apps[Number(app.fullgame.appid)] = { name: app.fullgame.name };
 			}
 		}
 	}

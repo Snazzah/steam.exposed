@@ -6,6 +6,7 @@ export const GAME_ACH_INCOMPLETE_STALE_TIME = 86400000; // 1 day
 export const PLAYER_ACH_INCOMPLETE_STALE_TIME = 3600000; // 1 hour
 export const YEAR_ACH_STALE_TIME = 3600000; // 1 hour
 export const ACH_DATA_STALE_TIME = 3600000; // 1 hour
+export const UNKNOWN_APPID_TIME = 86400000; // 1 day
 
 export function parseYear(request: Request) {
 	const LATEST_YEAR = getLatestYear();

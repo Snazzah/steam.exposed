@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SteamYearInReview } from '$lib/types';
+	import type { AppInfo, SteamYearInReview } from '$lib/types';
 	import BigStat from '$lib/components/BigStat.svelte';
 	import GameGridChild from './GameGridChild.svelte';
 	import { createEventDispatcher } from 'svelte';
@@ -10,7 +10,7 @@
 
 	const dispatch = createEventDispatcher<{ select: number }>();
 
-	export let apps: Record<number, string> = {};
+	export let apps: Record<number, AppInfo> = {};
 	export let yearInReview: SteamYearInReview;
 
 	const data = yearInReview.stats.playtime_stats.months.map((m) => ({
@@ -97,7 +97,7 @@
 								month.stats.total_playtime_seconds *
 								(monthGame.relative_playtime_percentagex100 / 10000)}
 							<GameGridChild
-								name={apps[monthGame.appid]}
+								info={apps[monthGame.appid]}
 								on:click={() => dispatch('select', monthGame.appid)}
 								{game}
 								footer={`~${prettyMilliseconds(playtimeSeconds * 1000)}`}
