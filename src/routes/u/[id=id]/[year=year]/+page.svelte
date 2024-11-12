@@ -28,17 +28,22 @@
 	import type { AchievementData } from '$lib/types';
 	import { SSEClient } from '$lib/sse';
 	import OnMount from '$lib/components/OnMount.svelte';
+	import { replaceState } from '$app/navigation';
 
 	export let data: PageData;
 	const available = Object.keys(data.yearInReview).length !== 0;
 
 	const tabs = ['Overview', 'Game List', 'By Month', 'Playtime Streak', 'Achievements'];
+  const tabLinks = ['', 'games', 'months', 'streak', 'achievements'];
 	let activeTab = 0;
 	let playtimeStats = !available ? null : data.yearInReview.stats.playtime_stats;
 
 	let selectedApp: number | null = null;
 	function onModalClick(this: any, e: any) {
-		if (e.target === this) selectedApp = null;
+		if (e.target === this) {
+      selectedApp = null;
+      replaceState(!location.hash ? '' : location.hash.split('?app=')[0], {});
+    }
 	}
 
 	const shareUrl = `https://steam.exposed/y${data.year.slice(2)}/${steamIdToInviteUrl(
@@ -71,6 +76,29 @@
 
   function onDataLoaded() {
     if (!achievements) sseClient.connect(`/u/${data.profile.steamid}/${data.year}/_sse`);
+
+    if (location.hash.startsWith('#/')) {
+      const referencedTab = location.hash.slice(2);
+      const index = tabLinks.indexOf(referencedTab);
+      if (index !== -1) activeTab = index;
+    }
+
+    if (location.hash.includes('?app=')) {
+      const [rest, app] = location.hash.split('?app=');
+      const appid = parseInt(app, 10);
+      if (isNaN(appid) || !isFinite(appid) || appid < 0 || !playtimeStats || !playtimeStats.game_summary.find((g) => g.appid === appid)) {
+        replaceState(rest, {});
+        return;
+      }
+
+      selectedApp = appid;
+    }
+  }
+
+  function onAppSelect(appid: number) {
+    selectedApp = appid;
+    if(!location.hash.includes('?app='))
+      replaceState(`${location.hash || '#'}?app=${selectedApp}`, {});
   }
 
 	onMount(() => {
@@ -245,7 +273,10 @@
 						<button
 							class="_tab w-[calc(50%-4px)] md:w-fit"
 							class:--active={activeTab === i}
-							on:click={() => (activeTab = i)}
+							on:click={() => {
+                activeTab = i;
+                replaceState(i === 0 ? '' : `#/${tabLinks[i]}`, {});
+              }}
 						>
               {#if isAchTab && achievementsLoading}
                 <Icon
@@ -270,19 +301,19 @@
 						apps={result.apps}
 						yearInReview={data.yearInReview}
             {achievements}
-						on:select={(e) => (selectedApp = e.detail)}
+						on:select={(e) => onAppSelect(e.detail)}
 					/>
 				{:else if activeTab === 2}
 					<MonthView
 						apps={result.apps}
 						yearInReview={data.yearInReview}
-						on:select={(e) => (selectedApp = e.detail)}
+						on:select={(e) => onAppSelect(e.detail)}
 					/>
 				{:else if activeTab === 3}
 					<PlaytimeStreak
 						apps={result.apps}
 						yearInReview={data.yearInReview}
-						on:select={(e) => (selectedApp = e.detail)}
+						on:select={(e) => onAppSelect(e.detail)}
 					/>
 				{:else if activeTab === 4}
           {#if achievementsLoading}
@@ -309,7 +340,7 @@
               apps={result.apps}
               yearInReview={data.yearInReview}
               {achievements}
-              on:select={(e) => (selectedApp = e.detail)}
+              on:select={(e) => onAppSelect(e.detail)}
             />
           {/if}
 				{/if}

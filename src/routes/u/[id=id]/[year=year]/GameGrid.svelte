@@ -201,7 +201,7 @@
 		</span>
 		<input
 			bind:value={searchQuery}
-			class="w-full px-4 py-2 transition-all pr-12 border border-neutral-600 hover:border-neutral-400 rounded bg-neutral-900 placeholder:text-neutral-600"
+			class="w-full px-4 py-2 transition-all pr-12 border border-neutral-600 hover:border-neutral-400 rounded bg-neutral-900 placeholder:text-neutral-500"
 			placeholder="Search..."
 		/>
 		{#if searchQuery !== ''}

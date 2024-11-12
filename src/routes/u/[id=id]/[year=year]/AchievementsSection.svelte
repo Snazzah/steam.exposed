@@ -54,7 +54,6 @@
     month: m.rtime_month,
     achievements: allAchievements.filter((ach) => ach.unlocked >= m.rtime_month && (yearInReview.stats.playtime_stats.months[i + 1]?.rtime_month ?? (stopDate / 1000)) > ach.unlocked).sort((a, b) => a.unlocked - b.unlocked)
   }));
-  $: console.log(months, calendar)
   const days = getCalendarRange(new Date(`Jan 1 ${yearInReview.stats.year}`), new Date(`Dec 31 ${yearInReview.stats.year}`));
   const calendar = groupBy(days, (d) => d.getMonth());
 
