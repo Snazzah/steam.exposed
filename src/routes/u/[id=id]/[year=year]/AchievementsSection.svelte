@@ -54,6 +54,7 @@
     month: m.rtime_month,
     achievements: allAchievements.filter((ach) => ach.unlocked >= m.rtime_month && (yearInReview.stats.playtime_stats.months[i + 1]?.rtime_month ?? (stopDate / 1000)) > ach.unlocked).sort((a, b) => a.unlocked - b.unlocked)
   }));
+  $: console.log(months, calendar)
   const days = getCalendarRange(new Date(`Jan 1 ${yearInReview.stats.year}`), new Date(`Dec 31 ${yearInReview.stats.year}`));
   const calendar = groupBy(days, (d) => d.getMonth());
 
@@ -147,7 +148,7 @@
     <!-- Month names -->
     {#each Object.keys(calendar) as monthStr}
       {@const month = parseInt(monthStr, 10)}
-      {@const monthName = shortMonthDtf.format(new Date(1e3 * (months[month].month + 86400)))}
+      {@const monthName = shortMonthDtf.format(calendar[month][0])}
       {@const active = selected?.type === 'month' && selected.month === month}
       <button
         class="absolute font-bold transition-all hover:underline decoration-blue-400"
