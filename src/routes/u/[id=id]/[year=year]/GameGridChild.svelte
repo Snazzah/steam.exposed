@@ -8,17 +8,22 @@
 	import { tweened } from 'svelte/motion';
 	import { getGameAsset } from '$lib/util';
 
-	export let info: AppInfo | undefined = undefined;
-	export let game: PlaytimeStatsGameSummary;
-	export let footer = '';
+	interface Props {
+		info?: AppInfo | undefined;
+		game: PlaytimeStatsGameSummary;
+		footer?: string;
+		onclick?(): void;
+	}
 
-	let coverUrl = '';
-	let element: HTMLButtonElement;
+	let { info = undefined, game, footer = '', onclick }: Props = $props();
+
+	let coverUrl = $state('');
+	let element = $state<HTMLButtonElement | undefined>();
 	const loadCover = async () => {
 		const asset = await getGameAsset(game.appid, ['libraryCover', 'portrait']);
 		if (asset) coverUrl = asset;
 	};
-  let appName = info?.name || `App ${game.appid}`;
+	let appName = info?.name || `App ${game.appid}`;
 
 	onMount(() => {
 		const intersectionObserverSupport =
@@ -27,14 +32,14 @@
 			'intersectionRatio' in window.IntersectionObserverEntry.prototype;
 		if (!intersectionObserverSupport) return void loadCover();
 
-		const unobserve = () => observer.unobserve(element);
+		const unobserve = () => observer.unobserve(element!);
 		const observer = new IntersectionObserver((elements) => {
 			if (elements[0]?.isIntersecting) {
 				unobserve();
 				loadCover();
 			}
 		});
-		observer.observe(element);
+		observer.observe(element!);
 		return unobserve;
 	});
 
@@ -55,12 +60,14 @@
 <button
 	bind:this={element}
 	use:floatingRef
-	on:mouseenter={() => showTooltip.set(1, { duration: 500 })}
-	on:mouseleave={() => showTooltip.set(0, { duration: 0 })}
-	on:focus={() => showTooltip.set(1, { duration: 0 })}
-	on:blur={() => showTooltip.set(0, { duration: 0 })}
-	on:click
-	on:click={() => showTooltip.set(0, { duration: 0 })}
+	onmouseenter={() => showTooltip.set(1, { duration: 500 })}
+	onmouseleave={() => showTooltip.set(0, { duration: 0 })}
+	onfocus={() => showTooltip.set(1, { duration: 0 })}
+	onblur={() => showTooltip.set(0, { duration: 0 })}
+	onclick={() => {
+		showTooltip.set(0, { duration: 0 });
+		onclick?.();
+	}}
 	class="_game w-24 md:w-48"
 >
 	{#if coverUrl}
@@ -80,8 +87,9 @@
 	{/if}
 	{#if footer}
 		<div class="absolute bottom-0 left-0 right-0 flex items-center justify-center px-1">
-			<span class="text-xs md:text-sm px-4 bg-zinc-600 rounded-t text-center _footer">{footer}</span
-			>
+			<span class="text-xs md:text-sm px-4 bg-zinc-600 rounded-t text-center _footer">
+				{footer}
+			</span>
 		</div>
 	{/if}
 	{#if game.demo || !info}

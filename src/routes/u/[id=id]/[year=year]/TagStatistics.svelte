@@ -1,8 +1,12 @@
 <script lang="ts">
 	import type { SteamYearInReview } from '$lib/types';
 
-	export let tags: { tagid: number; name: string }[] = [];
-	export let yearInReview: SteamYearInReview;
+	interface Props {
+		tags?: { tagid: number; name: string }[];
+		yearInReview: SteamYearInReview;
+	}
+
+	let { tags = [], yearInReview }: Props = $props();
 </script>
 
 <div>
@@ -15,7 +19,7 @@
 				<dd
 					class="w-full h-10 relative bg-black/20 overflow-hidden rounded-md border border-white/25 p-1"
 				>
-					<div class="bg-white h-full rounded" style:width={`${tag.tag_weight}%`} />
+					<div class="bg-white h-full rounded" style:width={`${tag.tag_weight}%`}></div>
 					<code class="absolute right-2 top-1 bottom-1 font-m text-white font-bold drop-shadow">
 						{tag.tag_weight.toFixed(2)}%
 					</code>

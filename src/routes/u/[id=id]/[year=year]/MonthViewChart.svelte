@@ -1,18 +1,31 @@
 <script lang="ts">
 	import type { AppInfo, SteamYearInReview } from '$lib/types';
 	import { calculateBarGraph, getGameAsset } from '$lib/util';
-	import { createEventDispatcher } from 'svelte';
 
-	export let apps: Record<number, AppInfo> = {};
-	export let yearInReview: SteamYearInReview;
-	export let data: {
-		month: number;
-		value: number;
-	}[];
-	export let chartType = 0;
-	export let selectedIndex = -1;
-	export let canvasFix = false;
-	export let useInt = false;
+	interface Props {
+		apps?: Record<number, AppInfo>;
+		yearInReview: SteamYearInReview;
+		data: {
+			month: number;
+			value: number;
+		}[];
+		chartType?: number;
+		selectedIndex?: any;
+		canvasFix?: boolean;
+		useInt?: boolean;
+		onselect?(appid: number): void;
+	}
+
+	let {
+		apps = {},
+		yearInReview,
+		data,
+		chartType = 0,
+		selectedIndex = -1,
+		canvasFix = false,
+		useInt = false,
+		onselect
+	}: Props = $props();
 
 	const gameColorClasses = [
 		'bg-gray-800 group-hover:bg-gray-700',
@@ -23,7 +36,6 @@
 
 	const longDtf = new Intl.DateTimeFormat(undefined, { month: 'long' });
 	const shortDtf = new Intl.DateTimeFormat(undefined, { month: 'short' });
-	const dispatch = createEventDispatcher<{ select: number }>();
 </script>
 
 <div
@@ -34,8 +46,8 @@
 		{#each ySteps as step}
 			<div class="w-5">
 				<span class="absolute -mt-4">
-          {useInt ? Math.round(step / 100) : `${Math.round(step)}%`}
-        </span>
+					{useInt ? Math.round(step / 100) : `${Math.round(step)}%`}
+				</span>
 				<hr class="border-t border-neutral-500 border-dashed h-[1px] w-full absolute" />
 			</div>
 		{/each}
@@ -52,7 +64,7 @@
 				class={`flex flex-col w-full h-full relative justify-end rounded ${
 					selectedIndex === i ? 'bg-neutral-500/50' : 'hover:bg-neutral-500/25'
 				} group`}
-				on:click={() => dispatch('select', i)}
+				onclick={() => onselect?.(i)}
 			>
 				<div
 					class="bg-gray-500 group-hover:bg-gray-400 w-full rounded relative"
@@ -97,31 +109,31 @@
 								style:height={`${
 									month.relative_monthly_stats.windows_playtime_percentagex100 / 100
 								}%`}
-							/>
+							></div>
 							<div
 								class="group-hover:brightness-110"
 								style:background-color="#46ab46"
 								style:height={`${
 									month.relative_monthly_stats.macos_playtime_percentagex100 / 100
 								}%`}
-							/>
+							></div>
 							<div
 								class="group-hover:brightness-110"
 								style:background-color="#683db4"
 								style:height={`${
 									month.relative_monthly_stats.linux_playtime_percentagex100 / 100
 								}%`}
-							/>
+							></div>
 							<div
 								class="group-hover:brightness-110"
 								style:background-color="#3898b0"
 								style:height={`${month.relative_monthly_stats.deck_playtime_percentagex100 / 100}%`}
-							/>
+							></div>
 							<div
 								class="group-hover:brightness-110"
 								style:background-color="#c7b84e"
 								style:height={`${month.relative_monthly_stats.vr_playtime_percentagex100 / 100}%`}
-							/>
+							></div>
 						</div>
 					{/if}
 				</div>

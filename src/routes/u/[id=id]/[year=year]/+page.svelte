@@ -30,20 +30,24 @@
 	import OnMount from '$lib/components/OnMount.svelte';
 	import { replaceState } from '$app/navigation';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const available = Object.keys(data.yearInReview).length !== 0;
 
 	const tabs = ['Overview', 'Game List', 'By Month', 'Playtime Streak', 'Achievements'];
-  const tabLinks = ['', 'games', 'months', 'streak', 'achievements'];
-	let activeTab = 0;
+	const tabLinks = ['', 'games', 'months', 'streak', 'achievements'];
+	let activeTab = $state(0);
 	let playtimeStats = !available ? null : data.yearInReview.stats.playtime_stats;
 
-	let selectedApp: number | null = null;
+	let selectedApp = $state<number | null>(null);
 	function onModalClick(this: any, e: any) {
 		if (e.target === this) {
-      selectedApp = null;
-      replaceState(!location.hash ? '' : location.hash.split('?app=')[0], {});
-    }
+			selectedApp = null;
+			replaceState(!location.hash ? '' : location.hash.split('?app=')[0], {});
+		}
 	}
 
 	const shareUrl = `https://steam.exposed/y${data.year.slice(2)}/${steamIdToInviteUrl(
@@ -65,71 +69,77 @@
 		url: shareUrl
 	};
 	const copyShareUrlTooltip = tweened(0, { duration: 500, easing: quartIn });
-	let shareAvailable = false;
+	let shareAvailable = $state(false);
 
-  let achievements: AchievementData | null = data.achievementData ?? null;
-  let achievementsLoading = !achievements;
-  let achievementsLoadingText = '';
-  let achievementsLoadingProgress = -1;
-  let achievementsError: any = null;
-  const sseClient = new SSEClient();
+	let achievements = $state<AchievementData | null>(data.achievementData ?? null);
+	let achievementsLoading = $state(!data.achievementData);
+	let achievementsLoadingText = $state('');
+	let achievementsLoadingProgress = $state(-1);
+	let achievementsError: any = $state(null);
+	const sseClient = new SSEClient();
 
-  function onDataLoaded() {
-    if (!achievements) sseClient.connect(`/u/${data.profile.steamid}/${data.year}/_sse`);
+	function onDataLoaded() {
+		if (!achievements) sseClient.connect(`/u/${data.profile.steamid}/${data.year}/_sse`);
 
-    if (location.hash.startsWith('#/')) {
-      const referencedTab = location.hash.slice(2);
-      const index = tabLinks.indexOf(referencedTab);
-      if (index !== -1) activeTab = index;
-    }
+		if (location.hash.startsWith('#/')) {
+			const referencedTab = location.hash.slice(2);
+			const index = tabLinks.indexOf(referencedTab);
+			if (index !== -1) activeTab = index;
+		}
 
-    if (location.hash.includes('?app=')) {
-      const [rest, app] = location.hash.split('?app=');
-      const appid = parseInt(app, 10);
-      if (isNaN(appid) || !isFinite(appid) || appid < 0 || !playtimeStats || !playtimeStats.game_summary.find((g) => g.appid === appid)) {
-        replaceState(rest, {});
-        return;
-      }
+		if (location.hash.includes('?app=')) {
+			const [rest, app] = location.hash.split('?app=');
+			const appid = parseInt(app, 10);
+			if (
+				isNaN(appid) ||
+				!isFinite(appid) ||
+				appid < 0 ||
+				!playtimeStats ||
+				!playtimeStats.game_summary.find((g) => g.appid === appid)
+			) {
+				replaceState(rest, {});
+				return;
+			}
 
-      selectedApp = appid;
-    }
-  }
+			selectedApp = appid;
+		}
+	}
 
-  function onAppSelect(appid: number) {
-    selectedApp = appid;
-    if(!location.hash.includes('?app='))
-      replaceState(`${location.hash || '#'}?app=${selectedApp}`, {});
-  }
+	function onAppSelect(appid: number) {
+		selectedApp = appid;
+		if (!location.hash.includes('?app='))
+			replaceState(`${location.hash || '#'}?app=${selectedApp}`, {});
+	}
 
 	onMount(() => {
 		shareAvailable = 'share' in navigator && navigator.canShare(shareContent);
 
-    sseClient.on('opened', () => console.log('[SSE] Opened'));
-    sseClient.on('retry', ({ attempts }) => console.log('[SSE] Retrying', { attempts }));
-    sseClient.on('closed', () => console.log('[SSE] Closed'));
-    sseClient.on('init', (info) => {
-      if (info.streaming === false) {
-        achievementsLoading = false;
-        achievements = info.data;
-        sseClient.close();
-      }
-    });
-    sseClient.on('update', (update) => {
-      if (update.text) achievementsLoadingText = update.text;
-      if (update.progress) achievementsLoadingProgress = update.progress;
-    });
-    sseClient.on('end', (info) => {
-      if (info.error) {
-        achievementsLoading = false;
-        achievementsError = { message: info.error }
-      } else if (info.data) {
-        achievementsLoading = false;
-        achievements = info.data;
-      }
-      sseClient.close();
-    });
+		sseClient.on('opened', () => console.log('[SSE] Opened'));
+		sseClient.on('retry', ({ attempts }) => console.log('[SSE] Retrying', { attempts }));
+		sseClient.on('closed', () => console.log('[SSE] Closed'));
+		sseClient.on('init', (info) => {
+			if (info.streaming === false) {
+				achievementsLoading = false;
+				achievements = info.data;
+				sseClient.close();
+			}
+		});
+		sseClient.on('update', (update) => {
+			if (update.text) achievementsLoadingText = update.text;
+			if (update.progress) achievementsLoadingProgress = update.progress;
+		});
+		sseClient.on('end', (info) => {
+			if (info.error) {
+				achievementsLoading = false;
+				achievementsError = { message: info.error };
+			} else if (info.data) {
+				achievementsLoading = false;
+				achievements = info.data;
+			}
+			sseClient.close();
+		});
 
-    return () => sseClient.close();
+		return () => sseClient.close();
 	});
 </script>
 
@@ -201,7 +211,7 @@
 				<button
 					class="px-2 py-1 flex justify-center items-center gap-1 rounded bg-black/50 transition-all hover:bg-neutral-800 active:bg-neutral-700"
 					title="Copy Share URL"
-					on:click={() => {
+					onclick={() => {
 						copyShareUrlTooltip.set(1, { duration: 0 });
 						copyShareUrlTooltip.set(0);
 						navigator.clipboard.writeText(shareUrl);
@@ -215,7 +225,7 @@
 						<button
 							class="px-2 py-1 flex justify-center items-center gap-1 rounded bg-neutral-900 transition-all hover:bg-neutral-800 active:bg-neutral-700"
 							title="Share..."
-							on:click={() => navigator.share(shareContent)}
+							onclick={() => navigator.share(shareContent)}
 						>
 							<Icon icon={shareIcon} />
 						</button>
@@ -261,29 +271,28 @@
 					<Icon icon={cancelIcon} class="w-16 h-16" />
 					<h3 class="text-2xl font-bold">Data Unavailable</h3>
 					<span class="text-neutral-400 text-center">
-            The data for {data.year}'s year in review wound up empty. The account must set their
+						The data for {data.year}'s year in review wound up empty. The account must set their
 						Year in Review's <b>Page Visibility</b> to <b>Public</b>.
-          </span>
+					</span>
 				</div>
 			{:else}
-        <OnMount on:mount={onDataLoaded} />
-				<div class="flex gap-2 whitespace-nowrap w-full flex-wrap md:flex-nowrap justify-center md:justify-start">
+				<OnMount mount={onDataLoaded} />
+				<div
+					class="flex gap-2 whitespace-nowrap w-full flex-wrap md:flex-nowrap justify-center md:justify-start"
+				>
 					{#each tabs as tab, i}
-            {@const isAchTab = tab === 'Achievements'}
+						{@const isAchTab = tab === 'Achievements'}
 						<button
 							class="_tab w-[calc(50%-4px)] md:w-fit"
-							class:--active={activeTab === i}
-							on:click={() => {
-                activeTab = i;
-                replaceState(i === 0 ? '' : `#/${tabLinks[i]}`, {});
-              }}
+							class:__active={activeTab === i}
+							onclick={() => {
+								activeTab = i;
+								replaceState(i === 0 ? '' : `#/${tabLinks[i]}`, {});
+							}}
 						>
-              {#if isAchTab && achievementsLoading}
-                <Icon
-                  icon={loadingIcon}
-                  class="w-6 h-6 animate-spin flex-none"
-                />
-              {/if}
+							{#if isAchTab && achievementsLoading}
+								<Icon icon={loadingIcon} class="w-6 h-6 animate-spin flex-none" />
+							{/if}
 							<span>{tab}</span>
 						</button>
 					{/each}
@@ -300,49 +309,51 @@
 					<GameGrid
 						apps={result.apps}
 						yearInReview={data.yearInReview}
-            {achievements}
-						on:select={(e) => onAppSelect(e.detail)}
+						{achievements}
+						onselect={onAppSelect}
 					/>
 				{:else if activeTab === 2}
-					<MonthView
-						apps={result.apps}
-						yearInReview={data.yearInReview}
-						on:select={(e) => onAppSelect(e.detail)}
-					/>
+					<MonthView apps={result.apps} yearInReview={data.yearInReview} onselect={onAppSelect} />
 				{:else if activeTab === 3}
 					<PlaytimeStreak
 						apps={result.apps}
 						yearInReview={data.yearInReview}
-						on:select={(e) => onAppSelect(e.detail)}
+						onselect={onAppSelect}
 					/>
 				{:else if activeTab === 4}
-          {#if achievementsLoading}
-            <div class="flex flex-col gap-2 justify-center items-center select-none mt-20">
-              <img src="/images/spinner.png" alt="Loading" class="w-32 h-32" />
-              <span class="text-sm">{achievementsLoadingText || 'Loading achievements...'}</span>
-              <span class="text-xs">This usually takes a while depending on how many games this person unlocked achievements in.</span>
-              {#if achievementsLoadingProgress !== -1}
-                <div class="relative rounded-full bg-neutral-700 w-full h-2 overflow-hidden">
-                  <div class="h-full bg-blue-400 absolute left-0 transition-all" style:width={`${achievementsLoadingProgress * 100}%`} />
-                </div>
-              {/if}
-            </div>
-          {:else if achievementsError || !achievements}
-            <div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
-              <Icon icon={cancelIcon} class="w-16 h-16" />
-              <h3 class="text-2xl font-bold">Failed to load achievements</h3>
-              <span class="text-neutral-400 text-center">
-                A server error occurred while doing this, probably try again later.
-              </span>
-            </div>
-          {:else if achievements}
-            <AchievementsSection
-              apps={result.apps}
-              yearInReview={data.yearInReview}
-              {achievements}
-              on:select={(e) => onAppSelect(e.detail)}
-            />
-          {/if}
+					{#if achievementsLoading}
+						<div class="flex flex-col gap-2 justify-center items-center select-none mt-20">
+							<img src="/images/spinner.png" alt="Loading" class="w-32 h-32" />
+							<span class="text-sm">{achievementsLoadingText || 'Loading achievements...'}</span>
+							<span class="text-xs"
+								>This usually takes a while depending on how many games this person unlocked
+								achievements in.</span
+							>
+							{#if achievementsLoadingProgress !== -1}
+								<div class="relative rounded-full bg-neutral-700 w-full h-2 overflow-hidden">
+									<div
+										class="h-full bg-blue-400 absolute left-0 transition-all"
+										style:width={`${achievementsLoadingProgress * 100}%`}
+									></div>
+								</div>
+							{/if}
+						</div>
+					{:else if achievementsError || !achievements}
+						<div class="flex flex-col gap-4 justify-center items-center text-red-500 mt-20">
+							<Icon icon={cancelIcon} class="w-16 h-16" />
+							<h3 class="text-2xl font-bold">Failed to load achievements</h3>
+							<span class="text-neutral-400 text-center">
+								A server error occurred while doing this, probably try again later.
+							</span>
+						</div>
+					{:else if achievements}
+						<AchievementsSection
+							apps={result.apps}
+							yearInReview={data.yearInReview}
+							{achievements}
+							onselect={onAppSelect}
+						/>
+					{/if}
 				{/if}
 			{/if}
 
@@ -353,13 +364,18 @@
 						transition:fade={{ duration: 100 }}
 						class="fixed top-0 bottom-0 left-0 right-0 bg-black bg-opacity-25 backdrop-blur-sm select-none flex items-end md:items-center justify-center md:px-8 z-30"
 						aria-hidden="true"
-						on:click={onModalClick}
+						onclick={onModalClick}
 					>
 						<div
 							transition:fly={{ duration: 250, y: 32 }}
 							class="w-[1024px] max-h-[calc(100svh-6rem)] relative text-neutral-200 bg-neutral-900 rounded-t md:rounded-b shadow-lg flex-col justify-start items-start inline-flex overflow-hidden"
 						>
-							<GameModal appId={selectedApp} apps={result.apps} yearInReview={data.yearInReview} {achievements} />
+							<GameModal
+								appId={selectedApp}
+								apps={result.apps}
+								yearInReview={data.yearInReview}
+								{achievements}
+							/>
 						</div>
 					</div>
 				</Portal>
@@ -388,7 +404,7 @@
 			@apply scale-95;
 		}
 
-		&.--active {
+		&.__active {
 			@apply bg-neutral-500 text-white;
 		}
 	}

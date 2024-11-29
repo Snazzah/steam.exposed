@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { AchievementData, AppInfo, SteamYearInReview } from '$lib/types';
 	import { calcAchievements, getGameAsset, relativeTime } from '$lib/util';
-	import BigStat from '../../../../lib/components/BigStat.svelte';
+	import BigStat from '$lib/components/BigStat.svelte';
 	import prettyMilliseconds from 'pretty-ms';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '@iconify/svelte';
@@ -19,29 +19,33 @@
 	import Achievement from './Achievement.svelte';
 	import GameAchievementDetail from './GameAchievementDetail.svelte';
 
-	export let apps: Record<number, AppInfo> = {};
-	export let yearInReview: SteamYearInReview;
-  export let achievements: AchievementData | null = null;
-	let totalStats = yearInReview.stats.playtime_stats.total_stats;
+	interface Props {
+		apps?: Record<number, AppInfo>;
+		yearInReview: SteamYearInReview;
+		achievements?: AchievementData | null;
+		appId: number;
+	}
 
-	export let appId: number;
+	let { apps = {}, yearInReview, achievements = null, appId }: Props = $props();
+	let totalStats = yearInReview.stats.playtime_stats.total_stats;
 	let game = yearInReview.stats.playtime_stats.game_summary.find((g) => g.appid === appId)!;
 	let moreInfo = yearInReview.stats.playtime_stats.games.find((g) => g.appid === appId);
-  let appInfo = apps[appId];
-  let appName = appInfo?.name || `App ${appId}`;
+	let appInfo = apps[appId];
+	let appName = appInfo?.name || `App ${appId}`;
 
-  const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
-  const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
-  $: earnedAchievements = achievements?.games[appId]
-    ? achievements.games[appId]
-      ?.map((ach) => ({
-      ...ach,
-      unlocked: achievements.unlocked?.[appId]?.[ach.id] ?? 0
-      }))
-      .filter((ach) => ach.unlocked >= (startDate / 1000) && ach.unlocked < (stopDate / 1000))
-      .sort((a, b) => a.unlocked - b.unlocked)
-      ?? []
-    : []
+	const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
+	const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
+	let earnedAchievements = $derived(
+		achievements?.games[appId]
+			? (achievements.games[appId]
+					?.map((ach) => ({
+						...ach,
+						unlocked: achievements.unlocked?.[appId]?.[ach.id] ?? 0
+					}))
+					.filter((ach) => ach.unlocked >= startDate / 1000 && ach.unlocked < stopDate / 1000)
+					.sort((a, b) => a.unlocked - b.unlocked) ?? [])
+			: []
+	);
 
 	const dtf = new Intl.DateTimeFormat(undefined, {
 		weekday: 'long',
@@ -55,22 +59,22 @@
 	});
 	const achDtf = new Intl.DateTimeFormat(undefined, {
 		dateStyle: 'medium',
-    timeStyle: 'short'
+		timeStyle: 'short'
 	});
-  const dayDtf = new Intl.DateTimeFormat(undefined, {
+	const dayDtf = new Intl.DateTimeFormat(undefined, {
 		dateStyle: 'long'
-  });
+	});
 	const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'always' });
 
-	let heroUrl = '';
+	let heroUrl = $state('');
 	const loadHero = async () => {
 		const asset = await getGameAsset(game.appid, ['libraryHero']);
 		if (asset) heroUrl = asset;
 	};
 
-	let logoUrl = '';
+	let logoUrl = $state('');
 	const loadLogo = async () => {
-    if (!appInfo.logoPosition) return;
+		if (!appInfo.logoPosition) return;
 		const asset = await getGameAsset(game.appid, ['logo']);
 		if (asset) logoUrl = asset;
 	};
@@ -93,8 +97,8 @@
 		{/if}
 		{#if game.new_this_year}
 			<span class="text-xs md:text-sm px-2 bg-purple-500 text-white rounded _badge">
-        NEW THIS YEAR
-      </span>
+				NEW THIS YEAR
+			</span>
 		{/if}
 		{#if !apps[appId]}
 			<span
@@ -106,26 +110,31 @@
 		{/if}
 	</div>
 
-  {#if logoUrl && appInfo?.logoPosition}
-    <div
-      class="w-full h-full flex absolute p-2"
-      class:items-start={appInfo.logoPosition.position.startsWith('Top')}
-      class:items-center={appInfo.logoPosition.position.startsWith('Center')}
-      class:items-end={appInfo.logoPosition.position.startsWith('Bottom')}
-      class:justify-start={appInfo.logoPosition.position.endsWith('Left')}
-      class:justify-center={appInfo.logoPosition.position.endsWith('Center')}
-    >
-      <img style:height={`${appInfo.logoPosition.height}%`} src={logoUrl} alt={appName} title={appName} />
-    </div>
-  {:else}
-    <div
-      class="flex flex-col w-full items-start justify-center px-4 py-2 backdrop-blur-sm overflow-ellipsis bg-black/25"
-    >
-      <h3 class="_gameheadername font-bold md:text-4xl text-ellipsis">
-        {appName}
-      </h3>
-    </div>
-  {/if}
+	{#if logoUrl && appInfo?.logoPosition}
+		<div
+			class="w-full h-full flex absolute p-2"
+			class:items-start={appInfo.logoPosition.position.startsWith('Top')}
+			class:items-center={appInfo.logoPosition.position.startsWith('Center')}
+			class:items-end={appInfo.logoPosition.position.startsWith('Bottom')}
+			class:justify-start={appInfo.logoPosition.position.endsWith('Left')}
+			class:justify-center={appInfo.logoPosition.position.endsWith('Center')}
+		>
+			<img
+				style:height={`${appInfo.logoPosition.height}%`}
+				src={logoUrl}
+				alt={appName}
+				title={appName}
+			/>
+		</div>
+	{:else}
+		<div
+			class="flex flex-col w-full items-start justify-center px-4 py-2 backdrop-blur-sm overflow-ellipsis bg-black/25"
+		>
+			<h3 class="_gameheadername font-bold md:text-4xl text-ellipsis">
+				{appName}
+			</h3>
+		</div>
+	{/if}
 </div>
 
 <div class="flex flex-col p-4 gap-8 w-full overflow-y-auto light-scrollbar">
@@ -144,8 +153,8 @@
 					<dd>
 						{dtf.format(game.rtime_release_date * 1000)}
 						<span class="text-neutral-400">
-              ({relativeTime(rtf, game.rtime_release_date - Date.now() / 1000)})
-            </span>
+							({relativeTime(rtf, game.rtime_release_date - Date.now() / 1000)})
+						</span>
 					</dd>
 				{:else}
 					<dd class="italic text-neutral-500">Unknown</dd>
@@ -236,23 +245,31 @@
 		</BigStat>
 	</div>
 	<GameModalMonthChart {appId} {yearInReview} />
-  {#if earnedAchievements.length > 0 && achievements}
-    {@const { achTotal, achEarned, achEarnedBefore, earnedPercent, completed } = calcAchievements(achievements, appId, earnedAchievements)}
-    <div class="flex flex-col gap-4">
-      <h3 class="text-3xl font-extrabold text-white mb-2">Achievements Earned This Year</h3>
-      <div class="flex flex-col">
-        <GameAchievementDetail
-          achAmount={earnedAchievements.length}
-          {achTotal} {achEarned} {achEarnedBefore} {completed} {earnedPercent}
-        />
-      </div>
-      <div class="flex gap-2 flex-wrap">
-        {#each earnedAchievements as ach (`modal-${appId}:${ach.id}`)}
-          <Achievement achievement={ach} unlockedAt={ach.unlocked} dtf={achDtf} {dayDtf} />
-        {/each}
-      </div>
-    </div>
-  {/if}
+	{#if earnedAchievements.length > 0 && achievements}
+		{@const { achTotal, achEarned, achEarnedBefore, earnedPercent, completed } = calcAchievements(
+			achievements,
+			appId,
+			earnedAchievements
+		)}
+		<div class="flex flex-col gap-4">
+			<h3 class="text-3xl font-extrabold text-white mb-2">Achievements Earned This Year</h3>
+			<div class="flex flex-col">
+				<GameAchievementDetail
+					achAmount={earnedAchievements.length}
+					{achTotal}
+					{achEarned}
+					{achEarnedBefore}
+					{completed}
+					{earnedPercent}
+				/>
+			</div>
+			<div class="flex gap-2 flex-wrap">
+				{#each earnedAchievements as ach (`modal-${appId}:${ach.id}`)}
+					<Achievement achievement={ach} unlockedAt={ach.unlocked} dtf={achDtf} {dayDtf} />
+				{/each}
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style lang="scss">

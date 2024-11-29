@@ -3,7 +3,11 @@
 	import type { SteamYearInReview } from '$lib/types';
 	import BigStat from '$lib/components/BigStat.svelte';
 
-	export let yearInReview: SteamYearInReview;
+	interface Props {
+		yearInReview: SteamYearInReview;
+	}
+
+	let { yearInReview }: Props = $props();
 	let totalStats = yearInReview.stats.playtime_stats.total_stats;
 	let summaryStats = yearInReview.stats.playtime_stats.summary_stats;
 </script>

@@ -3,7 +3,11 @@
 	import type { SteamYearInReview } from '$lib/types';
 	import PercentChart from '$lib/components/PercentChart.svelte';
 
-	export let yearInReview: SteamYearInReview;
+	interface Props {
+		yearInReview: SteamYearInReview;
+	}
+
+	let { yearInReview }: Props = $props();
 	let games = yearInReview.stats.playtime_stats.game_summary;
 	const YEAR = 31536e3;
 	const endDate = new Date(`December 15 ${yearInReview.stats.year}`).getTime() / 1e3;

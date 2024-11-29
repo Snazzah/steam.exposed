@@ -5,7 +5,11 @@
 	import chartIcon from '@iconify-icons/mdi/chart-arc';
 	import kofiIcon from '@iconify-icons/simple-icons/kofi';
 
-	export let inline = false;
+	interface Props {
+		inline?: boolean;
+	}
+
+	let { inline = false }: Props = $props();
 </script>
 
 <footer

@@ -1,7 +1,12 @@
 <script lang="ts">
-	export let name: string;
-	export let small = false;
-	export let subtext = '';
+	interface Props {
+		name: string;
+		small?: boolean;
+		subtext?: string;
+		children?: import('svelte').Snippet;
+	}
+
+	let { name, small = false, subtext = '', children }: Props = $props();
 </script>
 
 <div class="flex flex-col gap-2 justify-center items-center">
@@ -11,7 +16,7 @@
 				small ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'
 			}`}
 		>
-			<slot />
+			{@render children?.()}
 		</span>
 
 		{#if subtext}

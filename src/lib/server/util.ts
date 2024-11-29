@@ -25,8 +25,10 @@ export function parseYear(request: Request) {
 }
 
 export function requestIsBot(userAgent: string | null) {
-	return !userAgent ||
+	return (
+		!userAgent ||
 		/bot|chatgpt|facebookexternalhit|WhatsApp|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|MetaInspector/i.test(
 			userAgent
-		);
+		)
+	);
 }

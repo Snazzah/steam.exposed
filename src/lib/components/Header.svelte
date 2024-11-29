@@ -5,13 +5,13 @@
 	import { browser } from '$app/environment';
 	import { fade } from 'svelte/transition';
 
-	let scrollTop = browser ? document.documentElement.scrollTop : 0;
+	let scrollTop = $state(browser ? document.documentElement.scrollTop : 0);
 	function onScroll() {
 		scrollTop = document.documentElement.scrollTop;
 	}
 </script>
 
-<svelte:document on:scroll={onScroll} />
+<svelte:document onscroll={onScroll} />
 
 <header class="w-full bg-black/50 backdrop-blur fixed top-0 left-0 right-0 h-16 z-30">
 	<div class="w-full h-full max-w-6xl mx-auto flex items-center justify-between px-4 md:px-10 py-4">
@@ -51,7 +51,7 @@
 			{#if $updated}
 				<button
 					class="rounded px-2 py-0.5 text-black font-bold text-sm bg-blue-500 hover:bg-blue-400 shadow shadow-blue-500"
-					on:click={() => location.reload()}
+					onclick={() => location.reload()}
 				>
 					Site Updated, Refresh!
 				</button>

@@ -5,14 +5,18 @@
 	import PercentChart from '$lib/components/PercentChart.svelte';
 	import { makePlaytimeFunction } from '$lib/util';
 
-	export let yearInReview: SteamYearInReview;
-	export let stats: YearInReviewGameStats;
-	let games = yearInReview.stats.playtime_stats.game_summary;
-	export let excludeGames = false;
+	interface Props {
+		yearInReview: SteamYearInReview;
+		stats: YearInReviewGameStats;
+		excludeGames?: boolean;
+	}
+
+	let { yearInReview, stats, excludeGames = false }: Props = $props();
+	const games = yearInReview.stats.playtime_stats.game_summary;
 
 	const getPlaytime = makePlaytimeFunction(stats);
 
-	let platforms = [
+	const platforms = [
 		{
 			name: 'Windows',
 			percent: stats.windows_playtime_percentagex100 / 100,

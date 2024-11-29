@@ -164,32 +164,32 @@ export interface SteamTag {
 }
 
 export interface GameAchievement {
-  id: string;
-  name: string;
-  description: string;
-  hidden: boolean;
-  icon: string;
-  iconGray: string;
-  percent: number;
-  foundAt: number;
-  removedAt: number | null;
+	id: string;
+	name: string;
+	description: string;
+	hidden: boolean;
+	icon: string;
+	iconGray: string;
+	percent: number;
+	foundAt: number;
+	removedAt: number | null;
 }
 
 export interface AchievementData {
-  games: Record<number, GameAchievement[] | null>;
-  unlocked: Record<number, Record<string, number> | null>;
-  complete: boolean;
-  total: number;
-  totalRare: number;
-  gamesWithAchievements: number;
+	games: Record<number, GameAchievement[] | null>;
+	unlocked: Record<number, Record<string, number> | null>;
+	complete: boolean;
+	total: number;
+	totalRare: number;
+	gamesWithAchievements: number;
 }
 
 export interface AppInfo {
-  name: string;
-  icon?: string;
-  logoPosition?: {
-    position: "BottomLeft" | "BottomCenter" | "TopCenter" | "CenterCenter";
-    width: number;
-    height: number;
-  }
+	name: string;
+	icon?: string;
+	logoPosition?: {
+		position: 'BottomLeft' | 'BottomCenter' | 'TopCenter' | 'CenterCenter';
+		width: number;
+		height: number;
+	};
 }

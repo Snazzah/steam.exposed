@@ -4,9 +4,13 @@
 	import { tweened } from 'svelte/motion';
 	import { quartIn } from 'svelte/easing';
 
-	export let icon: IconifyIcon = copyIcon;
-	export let title = 'Copy';
-	export let text = '';
+	interface Props {
+		icon?: IconifyIcon;
+		title?: string;
+		text?: string;
+	}
+
+	let { icon = copyIcon, title = 'Copy', text = '' }: Props = $props();
 
 	const copyShareUrlTooltip = tweened(0, { duration: 500, easing: quartIn });
 </script>
@@ -14,7 +18,7 @@
 <button
 	class="relative group"
 	{title}
-	on:click={() => {
+	onclick={() => {
 		copyShareUrlTooltip.set(1, { duration: 0 });
 		copyShareUrlTooltip.set(0);
 		navigator.clipboard.writeText(text);

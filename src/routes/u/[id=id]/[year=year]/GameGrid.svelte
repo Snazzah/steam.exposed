@@ -1,8 +1,12 @@
 <script lang="ts">
-	import type { AchievementData, AppInfo, PlaytimeStatsGameSummary, SteamYearInReview } from '$lib/types';
+	import type {
+		AchievementData,
+		AppInfo,
+		PlaytimeStatsGameSummary,
+		SteamYearInReview
+	} from '$lib/types';
 	import { clickOutside } from '$lib/actions';
 	import { writable } from 'svelte/store';
-	import { createEventDispatcher } from 'svelte';
 	import fuzzy from 'fuzzy';
 	import GameGridChild from './GameGridChild.svelte';
 	import prettyMilliseconds from 'pretty-ms';
@@ -19,29 +23,25 @@
 	import vrIcon from '@iconify-icons/mdi/virtual-reality';
 	import ThreeWaySwitch from '$lib/components/ThreeWaySwitch.svelte';
 
-	const dispatch = createEventDispatcher<{ select: number }>();
-
 	interface SortInformation {
 		playtime: number;
 		playtimeEstimated: boolean;
 		rank: number;
 	}
 
-	export let apps: Record<number, AppInfo> = {};
-	export let yearInReview: SteamYearInReview;
-  export let achievements: AchievementData | null;
+	interface Props {
+		apps?: Record<number, AppInfo>;
+		yearInReview: SteamYearInReview;
+		achievements: AchievementData | null;
+		onselect(appid: number): void;
+	}
 
-  const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
-  const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
-  $: sortedAchs = achievements ? Object.keys(achievements.unlocked).reduce((p, k) => {
-    const v = achievements.unlocked[parseInt(k, 10)];
-    return {
-      ...p,
-      [k]: v ? Object.keys(v).filter((achid) => v[achid] !== 0 && v[achid] >= (startDate / 1000) && v[achid] < (stopDate / 1000)).length : 0
-    }
-  }, {} as Record<number, number>) : {};
+	let { apps = {}, yearInReview, achievements, onselect }: Props = $props();
+
+	const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
+	const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
 	let totalStats = yearInReview.stats.playtime_stats.total_stats;
-	let sortType = 0;
+	let sortType = $state(0);
 	const dtf = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' });
 	let gameSortInfo = (() => {
 		const result: Record<number, SortInformation> = {};
@@ -76,15 +76,22 @@
 					: '';
 			case 5:
 				return sortedAchs[game.appid]
-          ? `${sortedAchs[game.appid].toLocaleString()} achievement${sortedAchs[game.appid] === 1 ? '' : 's'}`
+					? `${sortedAchs[game.appid].toLocaleString()} achievement${sortedAchs[game.appid] === 1 ? '' : 's'}`
 					: '';
 		}
 	}
 
-	let showSortDropdown = false;
-	const sortNames = ['Rank', 'Playtime', 'Sessions', 'Release Date', 'First Played', 'Achievements Earned'];
-	let filterPrompt: HTMLDivElement;
-	let showFilterPopout = false;
+	let showSortDropdown = $state(false);
+	const sortNames = [
+		'Rank',
+		'Playtime',
+		'Sessions',
+		'Release Date',
+		'First Played',
+		'Achievements Earned'
+	];
+	let filterPrompt = $state<HTMLDivElement | undefined>();
+	let showFilterPopout = $state(false);
 	const defaultFilters: {
 		platforms: Record<string, boolean>;
 		controller: -1 | 0 | 1;
@@ -105,13 +112,11 @@
 		playtest: 0
 	};
 	let filters = writable(defaultFilters);
-	$: filtersApplied = JSON.stringify(defaultFilters) !== JSON.stringify($filters);
 	function clearFilters() {
 		filters.set(defaultFilters);
 	}
 
-	let searchQuery = '';
-	$: games = sortGames(sortType, $filters, searchQuery);
+	let searchQuery = $state('');
 	function sortGames(sortType: number, filters: typeof defaultFilters, query: string) {
 		let sortFn: ((a: PlaytimeStatsGameSummary, b: PlaytimeStatsGameSummary) => number) | null =
 			null;
@@ -135,8 +140,7 @@
 				break;
 			}
 			case 5: {
-				sortFn = (a, b) =>
-					(sortedAchs[b.appid] || 0) - (sortedAchs[a.appid] || 0);
+				sortFn = (a, b) => (sortedAchs[b.appid] || 0) - (sortedAchs[a.appid] || 0);
 				break;
 			}
 		}
@@ -187,6 +191,27 @@
 		});
 		return results.map((r) => r.original);
 	}
+	let sortedAchs = $derived(
+		achievements
+			? Object.keys(achievements.unlocked).reduce(
+					(p, k) => {
+						const v = achievements.unlocked[parseInt(k, 10)];
+						return {
+							...p,
+							[k]: v
+								? Object.keys(v).filter(
+										(achid) =>
+											v[achid] !== 0 && v[achid] >= startDate / 1000 && v[achid] < stopDate / 1000
+									).length
+								: 0
+						};
+					},
+					{} as Record<number, number>
+				)
+			: {}
+	);
+	let filtersApplied = $derived(JSON.stringify(defaultFilters) !== JSON.stringify($filters));
+	let games = $derived(sortGames(sortType, $filters, searchQuery));
 </script>
 
 <div class="flex flex-col md:flex-row gap-2 md:gap-8 w-full justify-between">
@@ -206,7 +231,7 @@
 		/>
 		{#if searchQuery !== ''}
 			<button
-				on:click={() => (searchQuery = '')}
+				onclick={() => (searchQuery = '')}
 				class="absolute right-0 top-0 bottom-0 h-full px-4 hover:text-red-500 transition-colors"
 			>
 				<Icon icon={clearIcon} class="w-6 h-6" />
@@ -215,13 +240,9 @@
 	</div>
 	<div class="flex items-center justify-center gap-2 relative">
 		<span class="flex-none">Sort by</span>
-		<div
-			class="w-60 flex-grow relative"
-			use:clickOutside
-			on:blur={() => (showSortDropdown = false)}
-		>
+		<div class="w-60 flex-grow relative" use:clickOutside onblur={() => (showSortDropdown = false)}>
 			<button
-				on:click={() => (showSortDropdown = !showSortDropdown)}
+				onclick={() => (showSortDropdown = !showSortDropdown)}
 				class="w-full px-4 py-2 transition-all border border-neutral-600 hover:border-neutral-400 bg-neutral-900 rounded flex items-center justify-between"
 				class:border-neutral-300={showSortDropdown}
 			>
@@ -235,7 +256,7 @@
 					{#each sortNames as sortName, i}
 						<button
 							class="w-full px-4 py-2 transition-all hover:bg-neutral-700 flex items-center justify-between"
-							on:click={() => {
+							onclick={() => {
 								sortType = i;
 								showSortDropdown = false;
 							}}
@@ -249,9 +270,9 @@
 				</div>
 			{/if}
 		</div>
-		<div use:clickOutside={{ ignore: filterPrompt }} on:blur={() => (showFilterPopout = false)}>
+		<div use:clickOutside={{ ignore: filterPrompt }} onblur={() => (showFilterPopout = false)}>
 			<button
-				on:click={() => (showFilterPopout = !showFilterPopout)}
+				onclick={() => (showFilterPopout = !showFilterPopout)}
 				class="p-2 transition-all border border-neutral-600 hover:border-neutral-400 rounded flex items-center justify-center"
 				class:border-neutral-300={showFilterPopout}
 				class:bg-neutral-800={filtersApplied}
@@ -282,7 +303,7 @@
 										? 'bg-neutral-700 text-neutral-300'
 										: 'bg-neutral-900 text-neutral-600'
 								}`}
-								on:click={() =>
+								onclick={() =>
 									filters.update((f) => ({
 										...f,
 										platforms: { ...f.platforms, [platform.name]: !f.platforms[platform.name] }
@@ -298,41 +319,42 @@
 						<span>Played with Controller</span>
 						<ThreeWaySwitch
 							value={$filters.controller}
-							on:update={(value) => filters.update((f) => ({ ...f, controller: value.detail }))}
+							onupdate={(value) => filters.update((f) => ({ ...f, controller: value }))}
 						/>
 					</div>
 					<div class="flex items-center justify-between">
 						<span>Demos</span>
 						<ThreeWaySwitch
 							value={$filters.demo}
-							on:update={(value) => filters.update((f) => ({ ...f, demo: value.detail }))}
+							onupdate={(value) => filters.update((f) => ({ ...f, demo: value }))}
 						/>
 					</div>
 					<div class="flex items-center justify-between">
 						<span>Playtests</span>
 						<ThreeWaySwitch
 							value={$filters.playtest}
-							on:update={(value) => filters.update((f) => ({ ...f, playtest: value.detail }))}
+							onupdate={(value) => filters.update((f) => ({ ...f, playtest: value }))}
 						/>
 					</div>
 					<div class="flex items-center justify-between">
 						<span>
-              Unknown Apps
-              <span
+							Unknown Apps
+							<span
 								class="text-sm opacity-50"
-								title="Apps that could not be fetched information from.">
-                (?)
-              </span>
-            </span>
+								title="Apps that could not be fetched information from."
+							>
+								(?)
+							</span>
+						</span>
 						<ThreeWaySwitch
 							value={$filters.unknown}
-							on:update={(value) => filters.update((f) => ({ ...f, unknown: value.detail }))}
+							onupdate={(value) => filters.update((f) => ({ ...f, unknown: value }))}
 						/>
 					</div>
 				</div>
 				<button
 					class="hover:underline font-bold px-2 py-1 hover:bg-neutral-600 rounded"
-					on:click={clearFilters}
+					onclick={clearFilters}
 				>
 					Clear filters
 				</button>
@@ -347,7 +369,7 @@
 		<GameGridChild
 			info={apps[game.appid]}
 			{game}
-			on:click={() => dispatch('select', game.appid)}
+			onclick={() => onselect(game.appid)}
 			footer={formatSortInfo(game, sortInfo)}
 		/>
 	{/each}

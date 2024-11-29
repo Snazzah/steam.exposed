@@ -2,12 +2,14 @@
 	import type { AppInfo, SteamYearInReview } from '$lib/types';
 	import BigStat from '$lib/components/BigStat.svelte';
 	import GameGridChild from './GameGridChild.svelte';
-	import { createEventDispatcher } from 'svelte';
 
-	const dispatch = createEventDispatcher<{ select: number }>();
+	interface Props {
+		apps?: Record<number, AppInfo>;
+		yearInReview: SteamYearInReview;
+		onselect(appid: number): void;
+	}
 
-	export let apps: Record<number, AppInfo> = {};
-	export let yearInReview: SteamYearInReview;
+	let { apps = {}, yearInReview, onselect }: Props = $props();
 	const playtimeStreak = yearInReview.stats.playtime_stats.playtime_streak;
 	const gameAmount = playtimeStreak.streak_games.length;
 	const demoGameAmount = playtimeStreak.streak_games.filter(
@@ -38,9 +40,9 @@
 	</div>
 	<h4 class="text-center text-neutral-300">
 		{gameAmount.toLocaleString()} game{gameAmount === 1 ? '' : 's'} played
-    {#if demoGameAmount > 0}
-      (including {demoGameAmount.toLocaleString()} demo{demoGameAmount === 1 ? '' : 's'})
-    {/if}
+		{#if demoGameAmount > 0}
+			(including {demoGameAmount.toLocaleString()} demo{demoGameAmount === 1 ? '' : 's'})
+		{/if}
 	</h4>
 	<div class="flex flex-wrap gap-4 justify-around">
 		{#each playtimeStreak.streak_games as streakGame (streakGame.appid)}
@@ -50,7 +52,7 @@
 			{#if game}
 				<GameGridChild
 					info={apps[streakGame.appid]}
-					on:click={() => dispatch('select', streakGame.appid)}
+					onclick={() => onselect(streakGame.appid)}
 					{game}
 				/>
 			{/if}

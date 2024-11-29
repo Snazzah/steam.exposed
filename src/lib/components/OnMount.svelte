@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from "svelte";
-  const dispatch = createEventDispatcher();
-  onMount(() => dispatch('mount'));
+	import { onMount } from 'svelte';
+	interface Props {
+		mount?(): void;
+	}
+	let { mount }: Props = $props();
+	onMount(() => mount?.());
 </script>

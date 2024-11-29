@@ -2,14 +2,18 @@
 	import Icon, { type IconifyIcon } from '@iconify/svelte';
 	import prettyMilliseconds from 'pretty-ms';
 
-	export let data: {
-		icon?: IconifyIcon;
-		name: string;
-		color: string;
-		value: number;
-	}[] = [];
-	export let formatMs = false;
-	$: completeValue = data.reduce((p, v) => p + v.value, 0);
+	interface Props {
+		data?: {
+			icon?: IconifyIcon;
+			name: string;
+			color: string;
+			value: number;
+		}[];
+		formatMs?: boolean;
+	}
+
+	let { data = [], formatMs = false }: Props = $props();
+	let completeValue = $derived(data.reduce((p, v) => p + v.value, 0));
 </script>
 
 <div class="flex flex-col gap-4">
@@ -23,7 +27,7 @@
 					title={`${part.name}: ${
 						formatMs ? prettyMilliseconds(part.value * 1000) : part.value.toLocaleString()
 					}`}
-				/>
+				></span>
 			{/if}
 		{/each}
 	</div>
@@ -34,7 +38,7 @@
 					{#if part.icon}
 						<Icon icon={part.icon} class="w-4 h-4" color={part.color} />
 					{:else}
-						<span class="rounded-full w-4 h-4" style:background-color={part.color} />
+						<span class="rounded-full w-4 h-4" style:background-color={part.color}></span>
 					{/if}
 					{part.name}:
 

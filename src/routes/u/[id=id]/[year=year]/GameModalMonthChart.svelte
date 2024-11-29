@@ -3,8 +3,12 @@
 	import { calculateBarGraph } from '$lib/util';
 	import prettyMilliseconds from 'pretty-ms';
 
-	export let yearInReview: SteamYearInReview;
-	export let appId: number;
+	interface Props {
+		yearInReview: SteamYearInReview;
+		appId: number;
+	}
+
+	let { yearInReview, appId }: Props = $props();
 
 	const game = yearInReview.stats.playtime_stats.game_summary.find((g) => g.appid === appId)!;
 	const moreInfo = yearInReview.stats.playtime_stats.games.find((g) => g.appid === appId);
@@ -24,7 +28,7 @@
 	}));
 	const { topPercentage, ySteps } = calculateBarGraph(data);
 
-	let selectedMonthIndex = -1;
+	let selectedMonthIndex = $state(-1);
 </script>
 
 <div class="flex flex-col gap-4">
@@ -49,10 +53,10 @@
 			{/if}
 		{/if}
 	</div>
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="h-60 relative flex-none flex pt-5 gap-[1px] md:gap-0.5 text-xs text-neutral-400"
-		on:mouseleave={() => (selectedMonthIndex = -1)}
+		onmouseleave={() => (selectedMonthIndex = -1)}
 	>
 		<div class="flex flex-col justify-between pb-5 pr-1 items-end tracking-[-0.1em]">
 			{#each ySteps as step}
@@ -69,10 +73,10 @@
 		{#each data as m, i}
 			{@const date = new Date(1e3 * (m.month + 86400))}
 			<div class="flex flex-col w-full justify-end">
-				<!-- svelte-ignore a11y-mouse-events-have-key-events -->
+				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
 				<div
 					class="flex flex-col w-full h-full relative justify-end rounded hover:bg-neutral-500/25 group"
-					on:mouseover={() => (selectedMonthIndex = i)}
+					onmouseover={() => (selectedMonthIndex = i)}
 				>
 					<div
 						class="bg-green-500 group-hover:bg-green-400 w-full rounded relative"

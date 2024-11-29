@@ -14,8 +14,12 @@
 	import MonthViewChart from './MonthViewChart.svelte';
 	import { tweened } from 'svelte/motion';
 
-	export let apps: Record<number, AppInfo> = {};
-	export let yearInReview: SteamYearInReview;
+	interface Props {
+		apps?: Record<number, AppInfo>;
+		yearInReview: SteamYearInReview;
+	}
+
+	let { apps = {}, yearInReview }: Props = $props();
 	const data = yearInReview.stats.playtime_stats.months.map((m) => ({
 		month: m.rtime_month,
 		value: m.stats.total_playtime_percentagex100 / 10000
@@ -26,11 +30,11 @@
 	const inviteUrl = steamIdToInviteUrl($page.data.profile!.steamid);
 	const sharePath = `/y${$page.data.year!.slice(2)}/${inviteUrl}`;
 
-	let chart: HTMLDivElement;
-	let rendering = false;
-	let showModal = false;
+	let chart = $state<HTMLDivElement | undefined>();
+	let rendering = $state(false);
+	let showModal = $state(false);
 
-	let src = '';
+	let src = $state('');
 	let blob: Blob | null = null;
 	async function screenshot() {
 		if (src) return (showModal = true);
@@ -38,7 +42,7 @@
 		await tick();
 		await tick();
 		try {
-			const canvas = await html2canvas(chart, { useCORS: true, scale: 1.5 });
+			const canvas = await html2canvas(chart!, { useCORS: true, scale: 1.5 });
 			blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
 			canvas.remove();
 
@@ -82,7 +86,7 @@
 {#if $page.data.profile}
 	<button
 		class="flex gap-2 opacity-50 hover:opacity-75 active:opacity-100 transition-opacity md:flex-row-reverse"
-		on:click={screenshot}
+		onclick={screenshot}
 		disabled={rendering}
 		title="Create screenshot of chart"
 	>
@@ -155,7 +159,7 @@
 				transition:fade={{ duration: 100 }}
 				class="fixed top-0 bottom-0 left-0 right-0 bg-black bg-opacity-25 backdrop-blur-sm select-none flex items-end md:items-center justify-center md:px-8 z-30"
 				aria-hidden="true"
-				on:click={onModalClick}
+				onclick={onModalClick}
 			>
 				<div
 					transition:fly={{ duration: 250, y: 32 }}
@@ -178,7 +182,7 @@
 						</a>
 						<button
 							class="flex gap-2 items-center justify-center w-full md:rounded px-2 py-4 md:bg-neutral-800 hover:bg-neutral-700 transition-colors"
-							on:click={copy}
+							onclick={copy}
 						>
 							<Icon icon={copyIcon} class="w-6 h-6" />
 							<span>{$notifTimer === 0 ? 'Copy' : 'Copied!'}</span>

@@ -48,26 +48,26 @@ export interface SteamAppInfo {
 		appid: string;
 		name: string;
 	};
-  _steamData?: {
-    missingToken: boolean;
-    appid: string;
-    common: {
-      name: string;
-      type: 'Game' | 'Demo';
-      icon: string;
-      library_assets: {
-        library_capsule: string;
-        library_hero: string;
-        library_logo: string;
-        logo_position: {
-          pinned_position: 'BottomLeft' | 'BottomCenter' | 'TopCenter' | 'CenterCenter';
-          width_pct: string;
-          height_pct: string;
-        }
-      },
-    };
-    extended: any;
-  }
+	_steamData?: {
+		missingToken: boolean;
+		appid: string;
+		common: {
+			name: string;
+			type: 'Game' | 'Demo';
+			icon: string;
+			library_assets: {
+				library_capsule: string;
+				library_hero: string;
+				library_logo: string;
+				logo_position: {
+					pinned_position: 'BottomLeft' | 'BottomCenter' | 'TopCenter' | 'CenterCenter';
+					width_pct: string;
+					height_pct: string;
+				};
+			};
+		};
+		extended: any;
+	};
 }
 
 export interface SteamProfileItem {
@@ -104,103 +104,107 @@ export interface SteamProfileItems {
 }
 
 export interface SteamAchievementPercentages {
-  achievementpercentages?: {
-    achievements: {
-      name: string;
-      percent: number;
-    }[]
-  }
+	achievementpercentages?: {
+		achievements: {
+			name: string;
+			percent: number;
+		}[];
+	};
 }
 
 export interface SteamPlayerAchievements {
-  playerstats: {
-    error: string;
-    success: false;
-  } | {
-    steamID: string;
-    gameName: string;
-    achievements: {
-      apiname: string;
-      achieved: 0 | 1;
-      unlocktime: number;
-      name: string;
-      description: string;
-    }[];
-    success: true;
-  }
+	playerstats:
+		| {
+				error: string;
+				success: false;
+		  }
+		| {
+				steamID: string;
+				gameName: string;
+				achievements: {
+					apiname: string;
+					achieved: 0 | 1;
+					unlocktime: number;
+					name: string;
+					description: string;
+				}[];
+				success: true;
+		  };
 }
 
 export interface SteamGameSchema {
-  game?: {
-    gameName?: string;
-    gameVersion?: string;
-    availableGameStats?: {
-      achievements: {
-        name: string;
-        defaultvalue: number;
-        displayName: string;
-        hidden: number;
-        description: string;
-        icon: string;
-        icongray: string;
-      }[]
-    }
-  }
+	game?: {
+		gameName?: string;
+		gameVersion?: string;
+		availableGameStats?: {
+			achievements: {
+				name: string;
+				defaultvalue: number;
+				displayName: string;
+				hidden: number;
+				description: string;
+				icon: string;
+				icongray: string;
+			}[];
+		};
+	};
 }
 
 export interface SteamUserYearAchievements {
-  game_achievements?: {
-    appid: number;
-    achievements?: {
-      statid: number;
-      fieldid: number;
-      achievement_name_internal: string;
-    }[];
-    all_time_unlocked_achievements: number;
-    unlocked_more_in_future: boolean;
-  }[];
-  total_achievements: number;
-  total_rare_achievements: number;
-  total_games_with_achievements: number;
+	game_achievements?: {
+		appid: number;
+		achievements?: {
+			statid: number;
+			fieldid: number;
+			achievement_name_internal: string;
+		}[];
+		all_time_unlocked_achievements: number;
+		unlocked_more_in_future: boolean;
+	}[];
+	total_achievements: number;
+	total_rare_achievements: number;
+	total_games_with_achievements: number;
 }
 
 export interface SteamUserAchievementsXML {
-  playerstats: {
-    privacyState: 'public';
-    visibilityState: 3;
-    game: {
-      gameFriendlyName: number;
-      gameName: string;
-      gameLink: string;
-      gameIcon: string;
-      gameLogo: string;
-      gameLogoSmall: string;
-    },
-    player: {
-      steamID64: string;
-      customURL: string;
-    },
-    stats: {
-      hoursPlayed: number;
-    },
-    achievements: {
-      achievement: {
-        iconClosed: string;
-        iconOpen: string;
-        name: string;
-        apiname: string;
-        description: string;
-        unlockTimestamp?: number;
-      }[] | {
-        iconClosed: string;
-        iconOpen: string;
-        name: string;
-        apiname: string;
-        description: string;
-        unlockTimestamp?: number;
-      }
-    }
-  }
+	playerstats: {
+		privacyState: 'public';
+		visibilityState: 3;
+		game: {
+			gameFriendlyName: number;
+			gameName: string;
+			gameLink: string;
+			gameIcon: string;
+			gameLogo: string;
+			gameLogoSmall: string;
+		};
+		player: {
+			steamID64: string;
+			customURL: string;
+		};
+		stats: {
+			hoursPlayed: number;
+		};
+		achievements: {
+			achievement:
+				| {
+						iconClosed: string;
+						iconOpen: string;
+						name: string;
+						apiname: string;
+						description: string;
+						unlockTimestamp?: number;
+				  }[]
+				| {
+						iconClosed: string;
+						iconOpen: string;
+						name: string;
+						apiname: string;
+						description: string;
+						unlockTimestamp?: number;
+				  };
+		};
+	};
 }
 
 export async function fetchSteamSummary(steamid: string, loggedInUser = false) {
@@ -297,17 +301,21 @@ export async function fetchPlayerAchievements(steamid: string, appid: number) {
 
 export async function fetchGameSchema(appid: number) {
 	logInfo(`Fetching game schema for appid ${appid}`);
-	const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${appid}&key=${STEAM_WEBKEY}&format=json`);
+	const response = await fetch(
+		`https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${appid}&key=${STEAM_WEBKEY}&format=json`
+	);
 	if (response.status !== 200) return null;
 	const text = await response.text();
 	return JSON.parse(text) as SteamGameSchema;
 }
 
 export async function fetchUserYearAchievements(steamid: string, year: number, appids: number[]) {
-	logInfo(`Fetching user year achievements for steamid ${steamid} at year ${year} (${appids.length.toLocaleString()} appids)`);
+	logInfo(
+		`Fetching user year achievements for steamid ${steamid} at year ${year} (${appids.length.toLocaleString()} appids)`
+	);
 	const response = await fetch(
-    `https://api.steampowered.com/ISaleFeatureService/GetUserYearAchievements/v1/?key=${STEAM_WEBKEY}&steamid=${steamid}&year=${year}${appids.map((appid, i) => `&appids[${i}]=${appid}`)}&l=en`
-  );
+		`https://api.steampowered.com/ISaleFeatureService/GetUserYearAchievements/v1/?key=${STEAM_WEBKEY}&steamid=${steamid}&year=${year}${appids.map((appid, i) => `&appids[${i}]=${appid}`)}&l=en`
+	);
 	if (response.status !== 200) return null;
 	const text = await response.text();
 	return JSON.parse(text).response as SteamUserYearAchievements;
@@ -316,29 +324,33 @@ export async function fetchUserYearAchievements(steamid: string, year: number, a
 export async function fetchPlayerAchievementsXML(steamid: string, appid: number) {
 	logInfo(`Fetching user achievements XML for steamid ${steamid} on appid ${appid}`);
 	let response = await fetch(
-    `https://steamcommunity.com/profiles/${steamid}/stats/appid/${appid}/?tab=achievements&xml=1`,
-    { redirect: 'manual' }
-  );
+		`https://steamcommunity.com/profiles/${steamid}/stats/appid/${appid}/?tab=achievements&xml=1`,
+		{ redirect: 'manual' }
+	);
 
-  // Handle vanity app IDs
-  if (response.status === 302) {
-    const location = response.headers.get('location');
-    if (location && location.startsWith('https://steamcommunity.com/') && location.split('/')[5] === 'stats') {
-      const vanity = location.split('/')[6];
-      response = await fetch(
-        `https://steamcommunity.com/profiles/${steamid}/stats/${vanity}/?tab=achievements&xml=1`,
-        { redirect: 'manual' }
-      )
-    }
-  }
+	// Handle vanity app IDs
+	if (response.status === 302) {
+		const location = response.headers.get('location');
+		if (
+			location &&
+			location.startsWith('https://steamcommunity.com/') &&
+			location.split('/')[5] === 'stats'
+		) {
+			const vanity = location.split('/')[6];
+			response = await fetch(
+				`https://steamcommunity.com/profiles/${steamid}/stats/${vanity}/?tab=achievements&xml=1`,
+				{ redirect: 'manual' }
+			);
+		}
+	}
 
 	if (response.status !== 200) return null;
 	const text = await response.text();
-  if (!text.startsWith('<?xml')) return null;
-  const data = xmlParser.parse(text) as SteamUserAchievementsXML | { response: { error: string; } };
-  if ('response' in data && 'error' in data.response) {
-    logError(`Failed to fetch achievements XML [${steamid}/${appid}]:`, data.response.error);
-    return null;
-  }
+	if (!text.startsWith('<?xml')) return null;
+	const data = xmlParser.parse(text) as SteamUserAchievementsXML | { response: { error: string } };
+	if ('response' in data && 'error' in data.response) {
+		logError(`Failed to fetch achievements XML [${steamid}/${appid}]:`, data.response.error);
+		return null;
+	}
 	return data as SteamUserAchievementsXML;
 }

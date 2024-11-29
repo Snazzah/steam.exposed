@@ -2,16 +2,18 @@
 	import type { AppInfo, SteamYearInReview } from '$lib/types';
 	import BigStat from '$lib/components/BigStat.svelte';
 	import GameGridChild from './GameGridChild.svelte';
-	import { createEventDispatcher } from 'svelte';
 	import prettyMilliseconds from 'pretty-ms';
 	import PlatformSection from './PlatformSection.svelte';
 	import MonthViewChart from './MonthViewChart.svelte';
 	import MonthShare from './MonthShare.svelte';
 
-	const dispatch = createEventDispatcher<{ select: number }>();
+	interface Props {
+		apps?: Record<number, AppInfo>;
+		yearInReview: SteamYearInReview;
+		onselect(appid: number): void;
+	}
 
-	export let apps: Record<number, AppInfo> = {};
-	export let yearInReview: SteamYearInReview;
+	let { apps = {}, yearInReview, onselect }: Props = $props();
 
 	const data = yearInReview.stats.playtime_stats.months.map((m) => ({
 		month: m.rtime_month,
@@ -24,20 +26,22 @@
 
 	const longDtf = new Intl.DateTimeFormat(undefined, { month: 'long' });
 
-	let selectedMonthIndex = -1;
-	let chartType = 0;
+	let selectedMonthIndex = $state(-1);
+	let chartType = $state(0);
 	let chartTypes = ['Top Games', 'Platform'];
 </script>
 
 <div class="flex flex-col gap-8">
-	<div class="flex gap-2 md:items-center flex-col md:flex-row md:justify-between px-4 py-2 rounded bg-neutral-900">
+	<div
+		class="flex gap-2 md:items-center flex-col md:flex-row md:justify-between px-4 py-2 rounded bg-neutral-900"
+	>
 		<div class="flex gap-2 items-center">
 			<span>Display</span>
 			{#each chartTypes as tab, i}
 				<button
 					class="_tab self-stretch w-fit"
 					class:--active={chartType === i}
-					on:click={() => (chartType = i)}
+					onclick={() => (chartType = i)}
 				>
 					{tab}
 				</button>
@@ -57,7 +61,7 @@
 		{chartType}
 		{data}
 		selectedIndex={selectedMonthIndex}
-		on:select={(e) => (selectedMonthIndex = e.detail)}
+		onselect={(i) => (selectedMonthIndex = i)}
 	/>
 
 	{#if selectedMonthIndex === -1}
@@ -98,7 +102,7 @@
 								(monthGame.relative_playtime_percentagex100 / 10000)}
 							<GameGridChild
 								info={apps[monthGame.appid]}
-								on:click={() => dispatch('select', monthGame.appid)}
+								onclick={() => onselect(monthGame.appid)}
 								{game}
 								footer={`~${prettyMilliseconds(playtimeSeconds * 1000)}`}
 							/>
@@ -109,21 +113,3 @@
 		{/if}
 	{/each}
 </div>
-
-<style lang="scss">
-	._tab {
-		@apply px-4 py-1 rounded-md bg-neutral-800 transition-all;
-
-		&:hover {
-			@apply bg-neutral-700;
-		}
-
-		&:active {
-			@apply scale-95;
-		}
-
-		&.--active {
-			@apply bg-neutral-600 text-white;
-		}
-	}
-</style>

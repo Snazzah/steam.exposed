@@ -12,26 +12,30 @@
 	import { onMount } from 'svelte';
 	import { updated } from '$app/stores';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const LATEST_YEAR = getLatestYear();
-	let selectedYear = LATEST_YEAR;
-	let showYearDropdown = false;
+	let selectedYear = $state(LATEST_YEAR);
+	let showYearDropdown = $state(false);
 	const yearsAvailable = (() => {
 		const years: number[] = [];
 		for (let i = LATEST_YEAR; i >= MIN_YEAR; i--) years.push(i);
 		return years;
 	})();
 
-	let input = '';
-	let inputErrored = false;
+	let input = $state('');
+	let inputErrored = $state(false);
 	function submitInput() {
 		const url = resolveToURL(input, selectedYear);
 		if (!url) inputErrored = true;
 		else location.href = url;
 	}
 
-	let errorPrompt = '';
+	let errorPrompt = $state('');
 	onMount(() => {
 		if (location.hash === '#user_not_found') errorPrompt = "Failed to go to that user's profile...";
 		else if (location.hash === '#login_fail') errorPrompt = 'Failed to login...';
@@ -66,7 +70,7 @@
 	{#if $updated}
 		<button
 			class="px-4 py-1 rounded text-black font-bold text-sm transition-colors bg-blue-500 hover:bg-blue-400 shadow shadow-blue-500"
-			on:click={() => location.reload()}
+			onclick={() => location.reload()}
 		>
 			Site Updated, Refresh!
 		</button>
@@ -74,10 +78,10 @@
 	<div class="flex flex-col gap-4 w-full items-center">
 		<div class="flex md:block flex-col gap-4 md:relative w-full max-w-lg">
 			<input
-				on:keypress={(e) => {
+				onkeypress={(e) => {
 					if (e.key === 'Enter') submitInput();
 				}}
-				on:keydown={() => {
+				onkeydown={() => {
 					if (inputErrored) inputErrored = false;
 				}}
 				bind:value={input}
@@ -88,11 +92,11 @@
 			<div
 				class="flex md:absolute right-0 transition-all h-full top-0 bottom-0 gap-2 md:gap-0"
 				use:clickOutside
-				on:blur={() => (showYearDropdown = false)}
+				onblur={() => (showYearDropdown = false)}
 			>
 				<div class="flex h-full relative w-full md:w-auto">
 					<button
-						on:click={() => (showYearDropdown = !showYearDropdown)}
+						onclick={() => (showYearDropdown = !showYearDropdown)}
 						class="flex h-full w-full md:w-auto py-2 px-4 md:px-2 hover:text-white items-center justify-between rounded border md:border-none border-neutral-600 hover:border-neutral-400 bg-neutral-900 md:bg-transparent"
 					>
 						<span>{selectedYear}</span>
@@ -106,7 +110,7 @@
 							{#each yearsAvailable as year}
 								<button
 									class="w-full py-2 px-4 md:px-2 transition-all hover:bg-neutral-700 flex items-center justify-between"
-									on:click={() => {
+									onclick={() => {
 										selectedYear = year;
 										showYearDropdown = false;
 									}}
@@ -122,7 +126,7 @@
 				</div>
 				<button
 					class="hover:text-white transition-all h-[42px] px-4 py-2 rounded bg-neutral-900 md:bg-transparent border md:border-none border-neutral-600 hover:border-neutral-400"
-					on:click={submitInput}
+					onclick={submitInput}
 				>
 					<Icon icon={sendIcon} class="w-5 h-5" />
 				</button>
