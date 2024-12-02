@@ -7,6 +7,7 @@
 	import Icon from '@iconify/svelte';
 	import steamIcon from '@iconify-icons/mdi/steam';
 	import cancelIcon from '@iconify-icons/mdi/cancel';
+	import menuIcon from '@iconify-icons/mdi/chevron-down';
 	import linkIcon from '@iconify-icons/mdi/link';
 	import shareIcon from '@iconify-icons/mdi/share-variant';
 	import twitterIcon from '@iconify-icons/mdi/twitter';
@@ -19,7 +20,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import { loadingIcon, steamIdToInviteUrl } from '$lib/util';
+	import { getLatestYear, loadingIcon, MIN_YEAR, steamIdToInviteUrl } from '$lib/util';
 	import GameModal from './GameModal.svelte';
 	import Portal from 'svelte-portal';
 	import { fade, fly } from 'svelte/transition';
@@ -28,7 +29,8 @@
 	import type { AchievementData } from '$lib/types';
 	import { SSEClient } from '$lib/sse';
 	import OnMount from '$lib/components/OnMount.svelte';
-	import { replaceState } from '$app/navigation';
+	import { goto, replaceState } from '$app/navigation';
+	import { clickOutside } from '$lib/actions';
 
 	interface Props {
 		data: PageData;
@@ -70,6 +72,13 @@
 	};
 	const copyShareUrlTooltip = tweened(0, { duration: 500, easing: quartIn });
 	let shareAvailable = $state(false);
+
+	let showYearDropdown = $state(false);
+	const yearsAvailable = $derived(() => {
+		const years: number[] = [];
+		for (let i = getLatestYear(); i >= MIN_YEAR; i--) years.push(i);
+		return years;
+	});
 
 	let achievements = $state<AchievementData | null>(data.achievementData ?? null);
 	let achievementsLoading = $state(!data.achievementData);
@@ -195,7 +204,43 @@
 		</div>
 		<div class="flex flex-col items-center md:items-start">
 			<h2 class="text-5xl font-bold text-white">{data.profile.personaname}</h2>
-			<span class="text-3xl">{data.year} Year In Review</span>
+			<span class="text-3xl">
+        <div
+          class="relative inline-block z-10"
+          use:clickOutside
+          onblur={() => (showYearDropdown = false)}
+        >
+          <button
+            class="px-2 py-1 rounded bg-black/50 transition-all hover:bg-neutral-800 active:scale-95 peer"
+            onclick={() => (showYearDropdown = !showYearDropdown)}
+          >
+            {data.year}
+          </button>
+          <Icon icon={menuIcon} class="absolute right-2 peer-hover:-right-10 z-[-1] opacity-0 peer-hover:opacity-100 top-0 bottom-0 my-auto w-8 h-8 rounded-full transition-all bg-neutral-800/50 backdrop-blur-md pointer-events-none" />
+
+					{#if showYearDropdown}
+            <div
+              class="absolute top-full w-full bg-neutral-800 rounded mt-2 z-20 flex flex-col overflow-hidden drop-shadow-md text-2xl ring-2 ring-black/50"
+              transition:fly={{ y: 10 }}
+            >
+              {#each yearsAvailable() as year}
+                <button
+                  class="w-full py-1 px-4 md:px-2 transition-all hover:bg-neutral-700 focus:bg-neutral-700 outline-none flex items-center justify-between data-[selected]:underline data-[selected]:decoration-sky-400 data-[selected]:text-white data-[selected]:pointer-events-none data-[selected]:opacity-35 data-[selected]:select-none"
+                  data-selected={String(year) === data.year ? 'true' : null}
+                  disabled={String(year) === data.year}
+                  onclick={() => {
+                    goto(`/u/${data.profile.steamid}/${year}`);
+                    showYearDropdown = false;
+                  }}
+                >
+                  {year}
+                </button>
+              {/each}
+          </div>
+					{/if}
+        </div>
+        <span>Year In Review</span>
+      </span>
 			<div
 				class="flex flex-col md:flex-row text-sm gap-2 justify-center items-center mt-2 relative"
 			>

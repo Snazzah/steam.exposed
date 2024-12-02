@@ -11,6 +11,7 @@
 	import { clickOutside } from '$lib/actions';
 	import { onMount } from 'svelte';
 	import { updated } from '$app/stores';
+	import { fly } from 'svelte/transition';
 
 	interface Props {
 		data: PageData;
@@ -106,6 +107,7 @@
 					{#if showYearDropdown}
 						<div
 							class="absolute top-full w-full bg-neutral-800 rounded mt-2 z-20 flex flex-col overflow-hidden drop-shadow-md"
+              transition:fly={{ y: 6 }}
 						>
 							{#each yearsAvailable as year}
 								<button
