@@ -4,7 +4,7 @@ import type { AchievementData, YearInReviewGameStats } from './types';
 
 export function getLatestYear() {
 	const currentYear = new Date().getFullYear();
-	const nextDate = new Date(`December 16 ${currentYear}`);
+	const nextDate = new Date(`December 20 ${currentYear}`);
 	if (nextDate.valueOf() < Date.now()) return currentYear;
 	return currentYear - 1;
 }
