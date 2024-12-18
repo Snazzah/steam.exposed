@@ -56,7 +56,7 @@
 		data.profile.steamid
 	)}`;
 	const shareContent = {
-		title: `${data.profile.personaname}'s ${data.year} Year in Review on steam.exposed`,
+		title: `${data.profile.personaname}'s ${data.year} Steam Replay on steam.exposed`,
 		text: !playtimeStats
 			? 'Failed to get information...'
 			: [
@@ -153,7 +153,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.profile.personaname}'s {data.year} Year in Review - steam.exposed</title>
+	<title>{data.profile.personaname}'s {data.year} Replay - steam.exposed</title>
 	<meta content={shareContent.title} property="og:title" />
 	<meta content={data.profile.avatarfull} property="og:image" />
 	<meta content="image/png" property="og:image:type" />
@@ -239,7 +239,7 @@
           </div>
 					{/if}
         </div>
-        <span>Year In Review</span>
+        <span>Steam Replay</span>
       </span>
 			<div
 				class="flex flex-col md:flex-row text-sm gap-2 justify-center items-center mt-2 relative"
@@ -316,8 +316,8 @@
 					<Icon icon={cancelIcon} class="w-16 h-16" />
 					<h3 class="text-2xl font-bold">Data Unavailable</h3>
 					<span class="text-neutral-400 text-center">
-						The data for {data.year}'s year in review wound up empty. The account must set their
-						Year in Review's <b>Page Visibility</b> to <b>Public</b>.
+						The data for {data.year}'s replay wound up empty. The account must set their
+						Steam Replay <b>Page Visibility</b> to <b>Public</b>.
 					</span>
 				</div>
 			{:else}

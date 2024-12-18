@@ -112,7 +112,7 @@
 					/>
 					<div class="flex flex-col">
 						<b class="text-white text-xl">{$page.data.profile.personaname}</b>
-						<span>{$page.data.year} Year In Review</span>
+						<span>{$page.data.year} Replay</span>
 					</div>
 					<span class="absolute bottom-3 right-2 tracking-tighter flex">
 						<code class="text-white">steam.exposed</code>
@@ -169,7 +169,7 @@
 						class="rounded border-4 border-neutral-800"
 						draggable
 						{src}
-						alt={`${$page.data.profile.personaname}'s ${$page.data.year} Year in Review Month Chart`}
+						alt={`${$page.data.profile.personaname}'s ${$page.data.year} Replay Month Chart`}
 					/>
 					<div class="flex w-full md:mt-2 bg-neutral-800 md:bg-transparent gap-2">
 						<a

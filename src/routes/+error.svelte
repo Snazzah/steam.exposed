@@ -9,7 +9,7 @@
 	<meta content="steam.exposed" property="og:title" />
 	<meta content="https://steam.exposed/images/icon.png" property="og:image" />
 	<meta content="image/png" property="og:image:type" />
-	<meta content="Breakdowns of Steam's Year in Reviews" property="og:description" />
+	<meta content="Breakdowns of Steam Replays" property="og:description" />
 	<meta content="https://steam.exposed" property="og:url" />
 	<meta property="twitter:card" content="summary" />
 </svelte:head>

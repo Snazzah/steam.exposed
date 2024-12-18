@@ -48,7 +48,7 @@
 	<meta content="steam.exposed" property="og:title" />
 	<meta content="https://steam.exposed/images/social.png" property="og:image" />
 	<meta content="image/png" property="og:image:type" />
-	<meta content="Breakdowns of Steam's Year in Reviews" property="og:description" />
+	<meta content="Breakdowns of Steam Replays" property="og:description" />
 	<meta content="https://steam.exposed" property="og:url" />
 	<meta property="twitter:card" content="summary_large_image" />
 </svelte:head>
@@ -61,7 +61,7 @@
 		class="bg-[url('/images/steam_fade.svg')] bg-contain bg-no-repeat bg-center flex flex-col justify-end text-center pt-60"
 	>
 		<h1 class="_shadow text-white font-bold text-4xl">steam.exposed</h1>
-		<span class="_shadow">Breakdowns of Steam's Year in Reviews</span>
+		<span class="_shadow">Breakdowns of Steam Replays</span>
 	</div>
 	{#if errorPrompt}
 		<div class="px-4 py-2 rounded bg-red-500 text-white font-bold">
