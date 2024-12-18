@@ -81,7 +81,7 @@
 							class="absolute flex flex-col w-full top-0 bottom-0 overflow-hidden rounded"
 							class:hidden={chartType !== 0}
 						>
-							{#each month.game_summary.slice(0, 3) as game, i (`${game.appid}:${m.month}`)}
+							{#each month.game_summary.sort((a, b) => b.relative_playtime_percentagex100 - a.relative_playtime_percentagex100).slice(0, 3) as game, i (`${game.appid}:${m.month}`)}
 								<div
 									class={`relative overflow-hidden ${gameColorClasses[i]}`}
 									style:height={`${game.relative_playtime_percentagex100 / 100}%`}
