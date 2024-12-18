@@ -90,15 +90,20 @@ export async function getAppInfo(appids: number[]) {
 			const response = await user.getProductInfo([...idsLeft], []);
 
 			for (const [id, app] of Object.entries(response.apps)) {
-				results[app.appinfo.appid] = {
-					name: app.appinfo.common.name,
-					_steamData: {
-						...app.appinfo,
-						missingToken: app.missingToken
-					}
-				};
-				await redis.set(`appinfo:${id}`, JSON.stringify(results[app.appinfo.appid]));
-				await redis.set(`appname:${id}`, app.appinfo.common.name);
+        if (app.appinfo.common) {
+          results[app.appinfo.appid] = {
+            name: app.appinfo.common.name,
+            _steamData: {
+              ...app.appinfo,
+              missingToken: app.missingToken
+            }
+          };
+          await redis.set(`appinfo:${id}`, JSON.stringify(results[app.appinfo.appid]));
+          await redis.set(`appname:${id}`, app.appinfo.common.name);
+        } else {
+          results[app.appinfo.appid] = { miss: true };
+          await redis.set(`appinfo:${app.appinfo.appid}`, '{"miss":true}', 'EX', UNKNOWN_APPID_TIME / 1000);
+        }
 			}
 
 			for (const id of response.unknownApps) {
