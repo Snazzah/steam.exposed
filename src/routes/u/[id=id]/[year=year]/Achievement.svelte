@@ -83,7 +83,7 @@
 					{/if}
 					{#if achievement.percent !== -1}
 						<span class:text-amber-300={achievement.percent < 10}
-							>{achievement.percent.toFixed(1)}% of players earned this achievement</span
+							>{typeof achievement.percent === 'string' ? achievement.percent : achievement.percent.toFixed(1)}% of players earned this achievement</span
 						>
 					{/if}
 					{#if achievement.removedAt}
