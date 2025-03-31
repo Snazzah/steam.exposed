@@ -4,7 +4,13 @@ import { fetch } from 'undici';
 import { logError, logInfo } from './logger';
 import { XMLParser } from 'fast-xml-parser';
 
-const xmlParser = new XMLParser();
+const xmlParser = new XMLParser({
+  numberParseOptions: {
+    hex: false,
+    leadingZeros: false,
+    eNotation: false
+  }
+});
 
 export enum SteamPersonaState {
 	OFFLINE = 0,
