@@ -9,7 +9,8 @@ const xmlParser = new XMLParser({
     hex: false,
     leadingZeros: false,
     eNotation: false
-  }
+  },
+  parseTagValue: false
 });
 
 export enum SteamPersonaState {
@@ -177,7 +178,7 @@ export interface SteamUserAchievementsXML {
 		privacyState: 'public';
 		visibilityState: 3;
 		game: {
-			gameFriendlyName: number;
+			gameFriendlyName: string;
 			gameName: string;
 			gameLink: string;
 			gameIcon: string;
