@@ -296,7 +296,7 @@ export async function getGameAchievements(
 					((ach.hidden
 						? xmlAchievements
 								?.find((a) => String(a.apiname).trim() === ach.name.toLowerCase())
-								?.description.trim()
+								?.description?.trim()
 						: '') ??
 						''),
 				hidden: !!ach.hidden,
