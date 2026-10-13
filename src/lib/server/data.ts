@@ -20,7 +20,11 @@ import { logInfo } from './logger';
 import { redis } from './redis';
 import split from 'just-split';
 import { user } from './steam';
-import { UNKNOWN_APPID_TIME } from './util';
+import {
+	PLAYER_ACH_INCOMPLETE_STALE_TIME,
+	PLAYER_ACH_STALE_TIME,
+	UNKNOWN_APPID_TIME
+} from './util';
 
 const STEAMDB_WENDY_STEAMID = '76561198074261126';
 const YEAR_ACH_BATCH_AMOUNT = 300;
@@ -311,6 +315,11 @@ export async function getGameAchievements(
 					// Default to -1
 					-1,
 				foundAt: cachedGame?.achievements?.find((a) => a.id === ach.name)?.foundAt ?? Date.now(),
+				addedAt: cachedGame?.achievements?.find((a) => a.id === ach.name)
+					? cachedGame.achievements.find((a) => a.id === ach.name)?.addedAt
+					: cachedGame
+						? Date.now()
+						: undefined,
 				removedAt: null
 			})),
 			// Show removed achievements
@@ -320,8 +329,7 @@ export async function getGameAchievements(
 				)
 				.map((ach) => ({
 					...ach,
-					removedAt:
-						cachedGame?.achievements?.find((a) => a.id === ach.name)?.removedAt ?? Date.now()
+					removedAt: ach.removedAt ?? Date.now()
 				}))
 		],
 		_fetchedAt: Date.now()
@@ -420,6 +428,8 @@ export async function getPlayerAchievements(
 	if (
 		cachedResult &&
 		!forceFetch &&
+		Date.now() - cachedResult._fetchedAt <
+			(cachedResult.success ? PLAYER_ACH_STALE_TIME : PLAYER_ACH_INCOMPLETE_STALE_TIME) &&
 		!(cachedResult._forYear !== 0 && forYear && cachedResult._forYear < forYear)
 	)
 		return cachedResult;
@@ -446,7 +456,7 @@ export async function getPlayerAchievements(
 			...achievements.playerstats.achievements.reduce(
 				(p, a) => ({
 					...p,
-					[a.apiname]: a.unlocktime
+					[a.apiname]: a.achieved ? a.unlocktime : 0
 				}),
 				{}
 			)

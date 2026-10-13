@@ -39,7 +39,7 @@
 	let { apps = {}, yearInReview, achievements, onselect }: Props = $props();
 
 	const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
-	const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
+	const stopDate = new Date(yearInReview.stats.year + 1, 0, 1).valueOf();
 	let totalStats = yearInReview.stats.playtime_stats.total_stats;
 	let sortType = $state(0);
 	const dtf = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' });

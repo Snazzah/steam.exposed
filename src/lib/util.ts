@@ -253,11 +253,13 @@ export function showLowestFixed(n: number) {
 	return n.toFixed(n < 1 ? (n < 0.1 ? (n < 0.01 ? 3 : 2) : 1) : 0);
 }
 
-// These elaborate checks are to filter out removed achievements from counts
+// Count achievements available in the selected period, using unlocks as evidence
+// when a schema addition was only detected after the achievement was earned.
 export function calcAchievements(
 	achievements: AchievementData,
 	appid: number,
-	earnedAchs: { id: string; unlocked: number }[]
+	earnedAchs: { id: string; unlocked: number }[],
+	before = Infinity
 ) {
 	if (earnedAchs.length === 0)
 		return {
@@ -268,19 +270,29 @@ export function calcAchievements(
 			completed: false
 		};
 
-	const achTotal = achievements.games[appid]?.filter((ach) => !ach.removedAt)?.length ?? 0;
-	const achEarned = earnedAchs.filter(
-		(ach) => !!achievements.games[appid]?.find((a) => a.id === ach.id && !a.removedAt)
-	).length;
+	const available = new Set(
+		(achievements.games[appid] ?? [])
+			.filter((ach) => {
+				const unlocked = achievements.unlocked[appid]?.[ach.id] ?? 0;
+				return (
+					(!ach.removedAt || ach.removedAt >= before) &&
+					(!ach.addedAt || ach.addedAt < before || (unlocked > 0 && unlocked * 1000 < before))
+				);
+			})
+			.map((ach) => ach.id)
+	);
+	const achTotal = available.size;
+	const earned = new Set(
+		earnedAchs.filter((ach) => ach.unlocked > 0 && available.has(ach.id)).map((ach) => ach.id)
+	);
+	const achEarned = earned.size;
+	const firstUnlock = Math.min(...earnedAchs.map((ach) => ach.unlocked));
 	const achEarnedBefore = Object.keys(achievements.unlocked[appid] ?? {}).filter((achid) => {
 		const unlocked = achievements.unlocked[appid]?.[achid] ?? 0;
-		const notRemoved = !!achievements.games[appid]?.find((a) => a.id === achid && !a.removedAt);
-		return (
-			unlocked !== 0 && achievements.games[appid] && notRemoved && earnedAchs[0].unlocked > unlocked
-		);
+		return unlocked > 0 && available.has(achid) && !earned.has(achid) && firstUnlock > unlocked;
 	}).length;
 	const earnedPercent = achTotal > 0 ? (achEarned / achTotal) * 100 : 0;
-	const completed = achEarned + achEarnedBefore === achTotal;
+	const completed = achTotal > 0 && achEarned + achEarnedBefore === achTotal;
 
 	return {
 		achTotal,

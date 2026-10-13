@@ -13,7 +13,6 @@ import {
 	ACH_DATA_STALE_TIME,
 	GAME_ACH_INCOMPLETE_STALE_TIME,
 	GAME_ACH_STALE_TIME,
-	PLAYER_ACH_INCOMPLETE_STALE_TIME,
 	YEAR_ACH_STALE_TIME
 } from './util';
 import type { AnyMessageEvent } from '$lib/sse/types';
@@ -132,7 +131,7 @@ async function achWorker(task: AchievementTask, cb: done) {
 					progress: appsFetched / (appAmount * 2)
 				}
 			});
-			const gameAchievements = await getGameAchievements(parseInt(appid, 10), id);
+			let gameAchievements = await getGameAchievements(parseInt(appid, 10), id);
 
 			// Refetch stale achievements
 			if (
@@ -140,12 +139,7 @@ async function achWorker(task: AchievementTask, cb: done) {
 				Date.now() - gameAchievements._fetchedAt >
 					(gameAchievements.complete ? GAME_ACH_STALE_TIME : GAME_ACH_INCOMPLETE_STALE_TIME)
 			)
-				q.push({
-					type: 'fetchGameAchievements',
-					appid: parseInt(appid, 10),
-					steamid: id,
-					reason: gameAchievements.complete ? 'stale' : 'stale_incomplete'
-				});
+				gameAchievements = await getGameAchievements(parseInt(appid, 10), id, true);
 
 			allGameAchievements[appid] = gameAchievements?.achievements ?? null;
 		}
@@ -164,19 +158,6 @@ async function achWorker(task: AchievementTask, cb: done) {
 				}
 			});
 			const playerAchievements = await getPlayerAchievements(id, parseInt(appid, 10), year);
-
-			// Refetch bad player achievements
-			if (
-				playerAchievements?.success === false &&
-				Date.now() - playerAchievements._fetchedAt > PLAYER_ACH_INCOMPLETE_STALE_TIME
-			)
-				q.push({
-					type: 'fetchPlayerAchievements',
-					appid: parseInt(appid, 10),
-					steamid: id,
-					year,
-					reason: 'stale_incomplete'
-				});
 
 			allPlayerAchievements[appid] = playerAchievements.success
 				? playerAchievements.achievements

@@ -172,6 +172,7 @@ export interface GameAchievement {
 	iconGray: string;
 	percent: number;
 	foundAt: number;
+	addedAt?: number;
 	removedAt: number | null;
 }
 

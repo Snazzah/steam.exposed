@@ -23,7 +23,7 @@
 
 	// Dates
 	const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
-	const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
+	const stopDate = new Date(yearInReview.stats.year + 1, 0, 1).valueOf();
 
 	// Achievement stuff
 	const allAchievements = Object.keys(achievements.unlocked)
@@ -56,7 +56,8 @@
 					a.unlocked !== 0 &&
 					a.unlocked >= startDate / 1000 &&
 					a.unlocked < stopDate / 1000
-			)
+			),
+			stopDate
 		);
 		return completed;
 	});
@@ -291,7 +292,7 @@
 				{#each Object.keys(selectedGames) as appidStr (`${selected.date}:${appidStr}`)}
 					{@const appid = parseInt(appidStr, 10)}
 					{@const { achTotal, achEarned, achEarnedBefore, earnedPercent, completed } =
-						calcAchievements(achievements, appid, selectedGames[appid])}
+						calcAchievements(achievements, appid, selectedGames[appid], stopDate)}
 
 					<div class="flex flex-col gap-2">
 						<div class="flex gap-4 items-center flex-none flex-col sm:flex-row">

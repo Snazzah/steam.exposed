@@ -34,7 +34,7 @@
 	let appName = appInfo?.name || `App ${appId}`;
 
 	const startDate = new Date(`Jan 1 ${yearInReview.stats.year}`).valueOf();
-	const stopDate = new Date(`Dec 31 ${yearInReview.stats.year}`).valueOf();
+	const stopDate = new Date(yearInReview.stats.year + 1, 0, 1).valueOf();
 	let earnedAchievements = $derived(
 		achievements?.games[appId]
 			? (achievements.games[appId]
@@ -249,7 +249,8 @@
 		{@const { achTotal, achEarned, achEarnedBefore, earnedPercent, completed } = calcAchievements(
 			achievements,
 			appId,
-			earnedAchievements
+			earnedAchievements,
+			stopDate
 		)}
 		<div class="flex flex-col gap-4">
 			<h3 class="text-3xl font-extrabold text-white mb-2">Achievements Earned This Year</h3>
